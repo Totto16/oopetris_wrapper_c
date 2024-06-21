@@ -60,7 +60,12 @@ construct_error_from_cstr_impl(OOPetrisRecordingReturnValue* return_value, const
         return nullptr;
     }
 
+#if defined(_MSC_VER)
+    std::memcpy(alloced_str, value, length + 1);
+#else
     std::strcpy(alloced_str, value);
+#endif
+
 
     return_value->is_error = true;
     return_value->value.error = alloced_str;
