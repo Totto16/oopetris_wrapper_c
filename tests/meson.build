@@ -11,10 +11,15 @@ test_src = [
 
 test_deps += dependency('criterion')
 
+## to ignore  '-stdlib=libc++'  on macos
+c = meson.get_compiler('c')
+c_args = c.get_supported_arguments(['-Wno-unused-command-line-argument'])
+
 tests = executable(
     'tests',
     test_src,
     dependencies: [test_deps, liboopetris_c_wrapper_dep],
+    c_args: c_args,
     override_options: {
         'warning_level': '3',
         'werror': true,
