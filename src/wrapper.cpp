@@ -60,7 +60,7 @@ construct_error_from_cstr_impl(OOPetrisRecordingReturnValue* return_value, const
         return nullptr;
     }
 
-    strcpy(alloced_str, value);
+    std::strcpy(alloced_str, value);
 
     return_value->is_error = true;
     return_value->value.error = alloced_str;
