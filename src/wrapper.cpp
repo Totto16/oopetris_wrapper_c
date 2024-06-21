@@ -130,7 +130,13 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
                                        return nullptr;
                                    }
 
-                                   strcpy(string, value.c_str());
+
+#if defined(_MSC_VER)
+                                   std::memcpy(string, value.c_str(), value.size() + 1);
+#else
+                                   std::strcpy(string, value.c_str());
+#endif
+
 
                                    return_value->type = OOPetrisAdditionalInformationType_String;
                                    return_value->value.string = string;
