@@ -120,7 +120,7 @@ jobs:
 
       - name: Build Wrapper
         run: | 
-          meson setup -Dtests=true -Dexample=true 
+          meson setup -Dtests=true -Dexample=true build
           meson compile -C build
           meson test -C build --verbose
 
