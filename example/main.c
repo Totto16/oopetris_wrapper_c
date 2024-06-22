@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
 
     if (is_error) {
         const char* error = oopetris_get_error(return_value);
-        fprintf(stderr, "An error occured: %s\n", error);
+        fprintf(stderr, "An error occurred: %s\n", error);
         FREE_AND_SET_NULL(oopetris_free_recording_value_whole, return_value);
         return EXIT_FAILURE;
     }
