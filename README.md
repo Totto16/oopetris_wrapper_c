@@ -3,7 +3,7 @@
 
 ## What is this?
 
-This wraps oopetris functionality for C
+This wraps [oopetris](https://github.com/OpenBrickProtocolFoundation/oopetris) functionality for C
 
 
 
