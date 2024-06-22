@@ -59,7 +59,7 @@ void print_field(const OOPetrisAdditionalInformationField* const field);
 void print_vector(const OOPetrisAdditionalInformationField* const* const field) {
 
     printf("\n");
-    for (size_t i = 0; i < oopetris_array_len(field); ++i) {
+    for (size_t i = 0; i < oopetris_array_len((void*) field); ++i) {
         print_field(field[i]);
         printf("\n");
     }
@@ -188,7 +188,7 @@ void print_mino_stack(const OOPetrisMino* const stack) {
 
     memset(buffer, '.', buffer_size);
 
-    for (size_t i = 0; i < oopetris_array_len(stack); ++i) {
+    for (size_t i = 0; i < oopetris_array_len((void*) stack); ++i) {
         const OOpetrisMinoPosition position = stack[i].position;
         buffer[position.x + (position.y * properties->width)] = '#';
     }

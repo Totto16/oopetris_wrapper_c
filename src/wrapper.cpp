@@ -591,6 +591,6 @@ void oopetris_free_grid_properties(OOPetrisGridProperties* properties) {
 }
 
 
-size_t oopetris_array_len(void* array) {
+size_t oopetris_array_len(void* const array) {
     return stbds_arrlenu(array);
 }
