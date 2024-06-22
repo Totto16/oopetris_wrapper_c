@@ -23,6 +23,6 @@ Test(Information, GridProperties) {
     cr_assert(eq(u32, properties->height, 20));
     cr_assert(eq(u32, properties->width, 10));
 
-    oopetris_free_grid_properties(&properties);
+    FREE_AND_SET_NULL(oopetris_free_grid_properties, properties);
     cr_assert(properties == NULL, "properties are freed correctly");
 }

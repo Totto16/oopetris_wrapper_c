@@ -106,7 +106,7 @@ struct OOPetrisAdditionalInformationImpl {
     OOPetrisAdditionalInformationField* value;
 };
 
-static void vector_of_value_free(OOPetrisAdditionalInformationField*** vector, size_t until_index);
+static void vector_of_value_free(OOPetrisAdditionalInformationField** vector, size_t until_index);
 
 static OOPetrisAdditionalInformationField* information_value_to_c(const recorder::InformationValue& value) {
 
@@ -197,7 +197,7 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
                                     for (std::size_t i = 0; i < value.size(); ++i) {
                                         auto* result = information_value_to_c(value.at(i));
                                         if (result == nullptr) {
-                                            vector_of_value_free(&fields, i);
+                                            vector_of_value_free(fields, i);
                                             free(return_value);
                                             return nullptr;
                                         }
@@ -213,28 +213,25 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
     );
 }
 
-static void free_additional_value_field(OOPetrisAdditionalInformationField** field) {
+static void free_additional_value_field(OOPetrisAdditionalInformationField* field) {
 
-    auto* orig_field = *field;
-
-    if (orig_field->type == OOPetrisAdditionalInformationType_String) {
-        free(orig_field->value.string);
-    } else if (orig_field->type == OOPetrisAdditionalInformationType_Vector) {
-        auto* vector = orig_field->value.vector;
-        vector_of_value_free(&vector, stbds_arrlenu(vector));
+    if (field->type == OOPetrisAdditionalInformationType_String) {
+        free(field->value.string);
+    } else if (field->type == OOPetrisAdditionalInformationType_Vector) {
+        auto* vector = field->value.vector;
+        vector_of_value_free(vector, stbds_arrlenu(vector));
     }
 
 
-    free(*field);
-    *field = NULL;
+    free(field);
 }
 
 
-static void vector_of_value_free(OOPetrisAdditionalInformationField*** vector, size_t until_index) {
+static void vector_of_value_free(OOPetrisAdditionalInformationField** vector, size_t until_index) {
 
 
     for (size_t i = 0; i < until_index; ++i) {
-        free_additional_value_field(&(*vector)[i]);
+        free_additional_value_field(vector[i]);
     }
 
 
@@ -282,9 +279,8 @@ const char** oopetris_additional_information_get_keys(OOPetrisAdditionalInformat
     return result_arr;
 }
 
-void oopetris_additional_information_keys_free(const char*** keys) {
-    stbds_arrfree(*keys);
-    *keys = NULL;
+void oopetris_additional_information_keys_free(const char** keys) {
+    stbds_arrfree(keys);
 }
 
 const OOPetrisAdditionalInformationField*
@@ -372,16 +368,15 @@ const OOPetrisAdditionalInformationField* const* oopetris_additional_information
 }
 
 
-static void oopetris_additional_information_free(OOPetrisAdditionalInformation** information) {
+static void oopetris_additional_information_free(OOPetrisAdditionalInformation* information) {
 
 
-    for (int i = 0; i < stbds_shlen(*information); ++i) {
+    for (int i = 0; i < stbds_shlen(information); ++i) {
 
-        free_additional_value_field(&((*information)[i].value));
+        free_additional_value_field(information[i].value);
     }
 
-    stbds_shfree(*information);
-    *information = NULL;
+    stbds_shfree(information);
 }
 
 static OOPetrisTetrionRecord record_to_c(const recorder::Record& record) {
@@ -541,36 +536,34 @@ OOPetrisRecordingInformation* oopetris_get_information(OOPetrisRecordingReturnVa
     return value->value.information;
 }
 
-void oopetris_free_recording_information(OOPetrisRecordingInformation** information) {
+void oopetris_free_recording_information(OOPetrisRecordingInformation* information) {
 
-    oopetris_additional_information_free(&((*information)->information));
+    oopetris_additional_information_free(information->information);
 
-    stbds_arrfree((*information)->records);
+    stbds_arrfree(information->records);
 
 
-    for (std::size_t i = 0; i < stbds_arrlenu((*information)->snapshots); ++i) {
-        const auto* mino_stack = (*information)->snapshots[i].mino_stack;
+    for (std::size_t i = 0; i < stbds_arrlenu(information->snapshots); ++i) {
+        const auto* mino_stack = information->snapshots[i].mino_stack;
         stbds_arrfree(mino_stack);
     }
 
-    stbds_arrfree((*information)->snapshots);
+    stbds_arrfree(information->snapshots);
 
-    stbds_arrfree((*information)->tetrion_headers);
+    stbds_arrfree(information->tetrion_headers);
 
-    free(*information);
-    *information = nullptr;
+    free(information);
 }
 
-void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue** information) {
-    free(*information);
-    *information = nullptr;
+void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue* information) {
+    free(information);
 }
 
-void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue** information) {
-    if (oopetris_is_error(*information)) {
-        free((*information)->value.error);
+void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue* information) {
+    if (oopetris_is_error(information)) {
+        free(information->value.error);
     } else {
-        oopetris_free_recording_information(&((*information)->value.information));
+        oopetris_free_recording_information(information->value.information);
     }
 
     oopetris_free_recording_value_only(information);
@@ -593,7 +586,6 @@ OOPetrisGridProperties* oopetris_get_grid_properties(void) {
 }
 
 
-void oopetris_free_grid_properties(OOPetrisGridProperties** properties) {
-    free(*properties);
-    *properties = nullptr;
+void oopetris_free_grid_properties(OOPetrisGridProperties* properties) {
+    free(properties);
 }

@@ -35,7 +35,7 @@ typedef struct OOPetrisAdditionalInformationFieldImpl OOPetrisAdditionalInformat
 const char** oopetris_additional_information_get_keys(OOPetrisAdditionalInformation* information);
 
 
-void oopetris_additional_information_keys_free(const char*** keys);
+void oopetris_additional_information_keys_free(const char** keys);
 
 const OOPetrisAdditionalInformationField*
 oopetris_additional_information_get_field(OOPetrisAdditionalInformation* information, const char* key);
@@ -186,11 +186,11 @@ const char* oopetris_get_error(OOPetrisRecordingReturnValue* value);
 
 OOPetrisRecordingInformation* oopetris_get_information(OOPetrisRecordingReturnValue* value);
 
-void oopetris_free_recording_information(OOPetrisRecordingInformation** information);
+void oopetris_free_recording_information(OOPetrisRecordingInformation* information);
 
-void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue** information);
+void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue* information);
 
-void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue** information);
+void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue* information);
 
 const char* oopetris_get_lib_version(void);
 
@@ -201,7 +201,14 @@ typedef struct {
 
 OOPetrisGridProperties* oopetris_get_grid_properties(void);
 
-void oopetris_free_grid_properties(OOPetrisGridProperties** properties);
+void oopetris_free_grid_properties(OOPetrisGridProperties* properties);
+
+
+#define FREE_AND_SET_NULL(fn, obj) \
+    do {                           \
+        fn(obj);                   \
+        obj = NULL;                \
+    } while (false)
 
 
 #ifdef __cplusplus

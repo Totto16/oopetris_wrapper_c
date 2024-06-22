@@ -204,7 +204,7 @@ void print_mino_stack(const OOPetrisMino* const stack) {
     }
 
     free(buffer);
-    oopetris_free_grid_properties(&properties);
+    FREE_AND_SET_NULL(oopetris_free_grid_properties, properties);
 }
 
 void print_snapshot(const OOpetrisTetrionSnapshot* const snapshot) {
@@ -232,7 +232,7 @@ void print_recording_information(const OOPetrisRecordingInformation* const infor
     }
     printf("\n");
 
-    oopetris_additional_information_keys_free(&keys);
+    FREE_AND_SET_NULL(oopetris_additional_information_keys_free, keys);
 
     printf("Headers:\n");
 
@@ -282,17 +282,17 @@ int main(int argc, char** argv) {
     if (is_error) {
         const char* error = oopetris_get_error(return_value);
         fprintf(stderr, "An error occured: %s\n", error);
-        oopetris_free_recording_value_whole(&return_value);
+        FREE_AND_SET_NULL(oopetris_free_recording_value_whole, return_value);
         return EXIT_FAILURE;
     }
 
     OOPetrisRecordingInformation* information = oopetris_get_information(return_value);
 
-    oopetris_free_recording_value_only(&return_value);
+    FREE_AND_SET_NULL(oopetris_free_recording_value_only, return_value);
 
     print_recording_information(information);
 
-    oopetris_free_recording_information(&information);
+    FREE_AND_SET_NULL(oopetris_free_recording_information, information);
 
     return EXIT_SUCCESS;
 }
