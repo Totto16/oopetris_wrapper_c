@@ -121,7 +121,7 @@ jobs:
 
       - name: Build Wrapper
         run: | 
-          meson setup -Dtests=true -Dexample=true build
+          meson setup -Dtests=true -Dexample=true build -Dbuildtype=release -Ddefault_library=static
           meson compile -C build
           meson test -C build --verbose
 
