@@ -1,6 +1,7 @@
 
 
 #include "oopetris_wrapper.h"
+#include "opaque_types.h"
 
 
 #if defined(__GNUC__)
@@ -41,15 +42,6 @@ bool oopetris_is_recording_file(const char* file_path) {
 }
 
 
-struct OOPetrisRecordingReturnValueImpl {
-    bool is_error;
-    union {
-        OOPetrisRecordingInformation* information;
-        char* error;
-    } value;
-};
-
-
 static OOPetrisRecordingReturnValue*
 construct_error_from_cstr_impl(OOPetrisRecordingReturnValue* return_value, const char* value, size_t length) {
 
@@ -82,29 +74,6 @@ static OOPetrisRecordingReturnValue*
 construct_error_from_string(OOPetrisRecordingReturnValue* return_value, const std::string& value) {
     return construct_error_from_cstr_impl(return_value, value.c_str(), value.size());
 }
-
-
-struct OOPetrisAdditionalInformationFieldImpl {
-    OOPetrisAdditionalInformationType type;
-    union {
-        char* string;
-        float float_v;
-        double double_v;
-        bool bool_v;
-        uint8_t u8;
-        int8_t i8;
-        uint32_t u32;
-        int32_t i32;
-        uint64_t u64;
-        int64_t i64;
-        OOPetrisAdditionalInformationField** vector;
-    } value;
-};
-
-struct OOPetrisAdditionalInformationImpl {
-    char* key;
-    OOPetrisAdditionalInformationField* value;
-};
 
 static void vector_of_value_free(OOPetrisAdditionalInformationField** vector, size_t until_index);
 

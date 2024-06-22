@@ -13,4 +13,7 @@ install_headers(
     preserve_path: true,
 )
 
-src_files += files('wrapper.cpp')
+src_files += files(
+    'opaque_types.h',
+    'wrapper.cpp',
+)
