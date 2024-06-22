@@ -59,7 +59,7 @@ void print_field(const OOPetrisAdditionalInformationField* const field);
 void print_vector(const OOPetrisAdditionalInformationField* const* const field) {
 
     printf("\n");
-    for (size_t i = 0; i < stbds_arrlenu(field); ++i) {
+    for (size_t i = 0; i < oopetris_array_len(field); ++i) {
         print_field(field[i]);
         printf("\n");
     }
@@ -188,7 +188,7 @@ void print_mino_stack(const OOPetrisMino* const stack) {
 
     memset(buffer, '.', buffer_size);
 
-    for (size_t i = 0; i < stbds_arrlenu(stack); ++i) {
+    for (size_t i = 0; i < oopetris_array_len(stack); ++i) {
         const OOpetrisMinoPosition position = stack[i].position;
         buffer[position.x + (position.y * properties->width)] = '#';
     }
@@ -225,7 +225,7 @@ void print_recording_information(const OOPetrisRecordingInformation* const infor
 
     const char** keys = oopetris_additional_information_get_keys(information->information);
 
-    for (size_t i = 0; i < stbds_arrlenu(keys); ++i) {
+    for (size_t i = 0; i < oopetris_array_len(keys); ++i) {
         printf("\t%s: ", keys[i]);
         print_field(oopetris_additional_information_get_field(information->information, keys[i]));
         printf("\n");
@@ -236,7 +236,7 @@ void print_recording_information(const OOPetrisRecordingInformation* const infor
 
     printf("Headers:\n");
 
-    for (size_t i = 0; i < stbds_arrlenu(information->tetrion_headers); ++i) {
+    for (size_t i = 0; i < oopetris_array_len(information->tetrion_headers); ++i) {
         printf("\t");
         print_tetrion_header(&(information->tetrion_headers[i]));
     }
@@ -244,7 +244,7 @@ void print_recording_information(const OOPetrisRecordingInformation* const infor
 
     printf("Records:\n");
 
-    for (size_t i = 0; i < stbds_arrlenu(information->records); ++i) {
+    for (size_t i = 0; i < oopetris_array_len(information->records); ++i) {
         printf("\t");
         print_record(&(information->records[i]));
     }
@@ -252,7 +252,7 @@ void print_recording_information(const OOPetrisRecordingInformation* const infor
 
     printf("Snapshots:\n");
 
-    for (size_t i = 0; i < stbds_arrlenu(information->snapshots); ++i) {
+    for (size_t i = 0; i < oopetris_array_len(information->snapshots); ++i) {
         print_snapshot(&(information->snapshots[i]));
     }
     printf("\n");

@@ -589,3 +589,8 @@ OOPetrisGridProperties* oopetris_get_grid_properties(void) {
 void oopetris_free_grid_properties(OOPetrisGridProperties* properties) {
     free(properties);
 }
+
+
+size_t oopetris_array_len(void* array) {
+    return stbds_arrlenu(array);
+}

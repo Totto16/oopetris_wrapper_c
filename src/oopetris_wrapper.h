@@ -204,6 +204,8 @@ OOPetrisGridProperties* oopetris_get_grid_properties(void);
 void oopetris_free_grid_properties(OOPetrisGridProperties* properties);
 
 
+size_t oopetris_array_len(void * array);
+
 #define FREE_AND_SET_NULL(fn, obj) \
     do {                           \
         fn(obj);                   \
