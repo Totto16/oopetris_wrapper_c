@@ -36,7 +36,7 @@ jobs:
         # NOTE: meson has no dependencies, so --break-system-packages doesn't really break anything!
       - name: Setup meson
         run: |
-          pip install meson --break-system-packages
+          sudo pip install meson --break-system-packages
 
       - name: Install dependencies
         run: |
