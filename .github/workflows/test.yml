@@ -105,7 +105,7 @@ jobs:
       - name: Configure
         run: | 
             cd oopetris
-            meson setup build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ matrix.config.os == 'macos'  && 'enabled' || 'disabled' }}  -Donly_build_libs=true ${{ matrix.config.os == 'windows' &&  '-Db_vscrt=static_from_buildtype' || '' }} 
+            meson setup build -Dbuildtype=debugoptimized -Ddefault_library=static -Dclang_libcpp=${{ matrix.config.os == 'macos'  && 'enabled' || 'disabled' }}  -Donly_build_libs=true ${{ matrix.config.os == 'windows' &&  '-Db_vscrt=static_from_buildtype' || '' }} 
 
       - name: Build and install Libs
         if: matrix.config.os != 'ubuntu'
@@ -121,9 +121,32 @@ jobs:
 
       - name: Build Wrapper
         run: | 
-          meson setup -Dtests=true -Dexample=true build -Dbuildtype=release -Ddefault_library=static
+          meson setup -Dtests=true -Dexample=true build -Dbuildtype=debug -Ddefault_library=static -Db_coverage=true
           meson compile -C build
+
+      - name: Test Wrapper
+        run: | 
           meson test -C build --verbose
+          ninja coverage -C build
+
+      - name: Create Coverage Report
+        uses: insightsengineering/coverage-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./build/meson-logs/coverage.xml
+          fail: true
+          publish: true
+          coverage-summary-title: "Code Coverage Summary"
+          togglable-report: true
+
+      - name: Upload test coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+            name: Tests coverage artifacts
+            path: |
+              ./build/meson-logs/coverage.xml
+              ./build/meson-logs/coveragereport/
+
 
       - name: Test for leaks with valgrind (Linux)
         if: matrix.config.os == 'ubuntu'  
