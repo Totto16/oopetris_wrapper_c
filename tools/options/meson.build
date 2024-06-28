@@ -25,9 +25,6 @@ elif cpp.get_id() == 'clang'
     endif
 
     if build_with_libcpp
-
-        compile_args += '-stdlib=libc++'
-
         deps += [
             cpp.find_library('c++'),
             cpp.find_library('c++abi'),

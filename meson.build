@@ -19,8 +19,6 @@ deps = []
 
 src_files = []
 
-compile_args = []
-
 subdir('src')
 
 subdir('tools')
