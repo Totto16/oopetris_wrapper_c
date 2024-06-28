@@ -1,8 +1,6 @@
 cpp = meson.get_compiler('cpp')
 
-if cpp.get_id() == 'gcc'
-    add_project_arguments('-Wold-style-cast', language: ['cpp'])
-elif cpp.get_id() == 'clang'
+if cpp.get_id() == 'clang'
 
     build_with_libcpp_option = get_option('clang_libcpp')
 
