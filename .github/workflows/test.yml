@@ -60,6 +60,7 @@ jobs:
 
       - name: Test Wrapper
         run: | 
+          ldd ./build/tests/tests
           meson test -C build --verbose
           ninja coverage -C build
 
