@@ -16,7 +16,7 @@ jobs:
           fetch-depth: "0"
 
       - uses: actions/checkout@v4
-        name: Checkout OOPetris main repo  
+        name: Checkout OOPetris main repo
         with:
           fetch-depth: "0"
           repository: OpenBrickProtocolFoundation/oopetris
@@ -49,13 +49,13 @@ jobs:
             meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=static -Dclang_libcpp=enabled -Donly_build_libs=true
 
       - name: Build and install Libs
-        run: |  
+        run: |
           cd oopetris 
           sudo meson install -C build 
 
       - name: Build Wrapper
         run: | 
-          meson setup build  -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=static -Dclang_libcpp=enabled -Dtests=true -Dexample=true
+          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=static -Dclang_libcpp=enabled -Dtests=true -Dexample=true
           meson compile -C build
 
       - name: Test Wrapper
