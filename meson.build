@@ -16,13 +16,14 @@ project(
 
 deps = []
 
-deps += dependency('oopetris-recordings')
 
 src_files = []
 
+compile_args = []
+
 subdir('src')
 
-src_files
+subdir('tools')
 
 liboopetris_c_wrapper = library(
     'oopetris_c_wrapper',

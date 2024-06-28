@@ -11,3 +11,10 @@ option(
     value: false,
     description: 'whether or not the example should be built',
 )
+
+option(
+    'clang_libcpp',
+    type: 'feature',
+    value: 'auto',
+    description: 'if using clang, build with libc++ instead of libstdc++ (gcc stdlib)',
+)
