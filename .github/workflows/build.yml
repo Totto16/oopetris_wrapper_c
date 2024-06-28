@@ -162,7 +162,7 @@ jobs:
           sudo pip install meson --break-system-packages
 
       - name: Fix pkg-config (Windows)
-        if: matrix.config.os == 'windows'
+        if: matrix.config.os == 'windows' && matrix.config.environment == 'msvc'
         run: |
           Remove-Item -Path C:\Strawberry\ -Recurse 
           choco install pkgconfiglite
