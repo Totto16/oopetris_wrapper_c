@@ -1,4 +1,4 @@
-name: Build CI
+name: Test CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}-${{ matrix.config.os-version }}
 
