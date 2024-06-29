@@ -583,13 +583,10 @@ OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
     stbds_sh_new_strdup(return_value->information);
 
     return_value->records = NULL;
-    stbds_arrsetlen(return_value->records, 0);
 
     return_value->snapshots = NULL;
-    stbds_arrsetlen(return_value->snapshots, 0);
 
     return_value->tetrion_headers = NULL;
-    stbds_arrsetlen(return_value->tetrion_headers, 0);
 
     return return_value;
 }
