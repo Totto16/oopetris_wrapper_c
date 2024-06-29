@@ -2,15 +2,22 @@
 #include "oopetris_wrapper.h"
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#if defined(_MSC_VER)
+#include <windows.h>
+#else
+#include <sys/stat.h>
 #include <unistd.h>
+#endif
 
-#include "oopetris_wrapper.h"
-
-
-// usage of a "typeof c++ operator in C, it's not the same, but it can do some stuff, first seen
-// this in VO Eidp (Einführung in die Programmierung - PS 11)", _Generic makes this possible :)
+#if defined(WITH_READLINE)
+#include <readline/history.h>
+#include <readline/readline.h>
+#endif
 
 void print_bool(bool val) {
     printf("%s", val ? "true" : "false");
@@ -64,6 +71,8 @@ void print_vector(const OOPetrisAdditionalInformationField* const* const field) 
         printf("\n");
     }
 }
+
+// usage of a "typeof c++ operator in C, it's not the same, but it can do some stuff", _Generic makes this possible :)
 
 // clang-format off
 #define PRINT_VALUE(val) \
@@ -189,7 +198,7 @@ void print_mino_stack(const OOPetrisMino* const stack) {
     memset(buffer, '.', buffer_size);
 
     for (size_t i = 0; i < oopetris_array_len((void*) stack); ++i) {
-        const OOpetrisMinoPosition position = stack[i].position;
+        const OOPetrisMinoPosition position = stack[i].position;
         buffer[position.x + (position.y * properties->width)] = '#';
     }
 
@@ -207,7 +216,7 @@ void print_mino_stack(const OOPetrisMino* const stack) {
     FREE_AND_SET_NULL(oopetris_free_grid_properties, properties);
 }
 
-void print_snapshot(const OOpetrisTetrionSnapshot* const snapshot) {
+void print_snapshot(const OOPetrisTetrionSnapshot* const snapshot) {
     printf("\tsimulation_step_index: %" PRIu64 "\ttetrion_index: %" PRIu8 "\n", snapshot->simulation_step_index,
            snapshot->tetrion_index);
 
@@ -216,6 +225,8 @@ void print_snapshot(const OOpetrisTetrionSnapshot* const snapshot) {
 
     print_mino_stack(snapshot->mino_stack);
 }
+
+typedef enum { ModeRead = 0, ModeWrite } Mode;
 
 
 void print_recording_information(const OOPetrisRecordingInformation* const information) {
@@ -258,15 +269,12 @@ void print_recording_information(const OOPetrisRecordingInformation* const infor
     printf("\n");
 }
 
-int main(int argc, char** argv) {
+void print_usage(const char* name) {
+    fprintf(stderr, "usage: %s <mode> <file>\n", name);
+    fprintf(stderr, "\tmode: read, r\nwrite, w\n");
+}
 
-
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <file>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    const char* file = argv[1];
+int read_file(const char* file) {
 
     const bool is_recordings_file = oopetris_is_recording_file(file);
 
@@ -295,4 +303,294 @@ int main(int argc, char** argv) {
     FREE_AND_SET_NULL(oopetris_free_recording_information, information);
 
     return EXIT_SUCCESS;
+}
+
+
+#if defined(WITH_READLINE)
+
+
+bool file_exists(const char* file) {
+#if defined(_MSC_VER)
+    return OpenFile(path, NULL, OF_EXIST) != HFILE_ERROR;
+#else
+
+    struct stat buffer;
+    return (stat(file, &buffer) == 0);
+
+#endif
+}
+
+typedef enum {
+    StateRoot = 0, //
+    StateAdditionalInformation,
+    StateRecords,
+    StateSnapshots,
+    StateHeaders
+} State;
+
+typedef enum {
+    CommandPrintHelp = 0,
+    CommandNoOp,
+    CommandError,
+    //
+    CommandGoToAddInf,
+    CommandInsertKey,
+    //
+    //TODO
+} Command;
+
+
+Command parse_command(State* state, void** data, const char* input) {
+
+#define ERROR_BUF_SIZE 0x200
+#define RETURN_ERROR(...)                                       \
+    do {                                                        \
+        *data = malloc(ERROR_BUF_SIZE);                         \
+        if (snprintf(*data, ERROR_BUF_SIZE, __VA_ARGS__) < 0) { \
+            free(data);                                         \
+            *data = NULL;                                       \
+        }                                                       \
+        return CommandError;                                    \
+    } while (false)
+
+
+    if (strcmp(input, "h") == 0 || strcmp(input, "help") == 0 || strcmp(input, "?") == 0) {
+        return CommandPrintHelp;
+    }
+
+    size_t length = strlen(input);
+    if (length == 0) {
+        RETURN_ERROR("To short command");
+    }
+
+
+    if (input[0] == 's') {
+
+        switch (*state) {
+            case StateRoot:
+                printf("Root\n");
+                return CommandNoOp;
+            case StateAdditionalInformation:
+                printf("AdditionalInformation\n");
+                return CommandNoOp;
+            case StateRecords:
+                printf("Records\n");
+                return CommandNoOp;
+            case StateSnapshots:
+                printf("Snapshots\n");
+                return CommandNoOp;
+            case StateHeaders:
+                printf("Headers\n");
+                return CommandNoOp;
+            default:
+                RETURN_ERROR("Unknown state");
+        }
+    } else if (input[0] == '!') {
+
+        if (length < 2) {
+            RETURN_ERROR("To short '!' command: missing second argument");
+        }
+
+        char type = input[1];
+
+        if (type == ' ') {
+            if (length < 3) {
+                RETURN_ERROR("To short '!' command: missing second argument");
+            }
+
+            type = input[2];
+        }
+
+        switch (type) {
+            case 'a':
+                *state = StateAdditionalInformation;
+                return CommandNoOp;
+            case 'r':
+                *state = StateRecords;
+                return CommandNoOp;
+            case 's':
+                *state = StateSnapshots;
+                return CommandNoOp;
+            case 'h':
+                *state = StateHeaders;
+                return CommandNoOp;
+            default:
+                RETURN_ERROR("Unknown Insertion type '%c'", type);
+        }
+    }
+
+
+    switch (*state) {
+        case StateRoot:
+            RETURN_ERROR("Unknown command: %s", input);
+
+        case StateAdditionalInformation: {
+
+            if (input[0] == ':') {
+                if (length < 2) {
+                    RETURN_ERROR("To short ':' command: missing second argument");
+                }
+
+                char type = input[1];
+
+                if (type == ' ') {
+                    if (length < 3) {
+                        RETURN_ERROR("To short ':' command: missing second argument");
+                    }
+
+                    type = input[2];
+                }
+
+                //TODO:
+                // :( ?)k (.*) key
+
+                switch (type) {
+                    case 'k':
+                        //TODO
+                        return CommandNoOp;
+
+                    default:
+                        RETURN_ERROR("Unknown ? type '%c'", type);
+                }
+            }
+
+            RETURN_ERROR("Unknown command: %s", input);
+        }
+
+        case StateRecords:
+            return CommandNoOp;
+        case StateSnapshots:
+            return CommandNoOp;
+        case StateHeaders:
+            return CommandNoOp;
+        default:
+            RETURN_ERROR("Unknown state");
+    }
+}
+
+#define STRINGIFY(a) STRINGIFY_HELPER_(a)
+#define STRINGIFY_HELPER_(a) #a
+
+
+int write_to_file(const char* file) {
+
+    if (file_exists(file)) {
+        fprintf(stderr, "File already exists, can't overwrite it!\n");
+        return EXIT_FAILURE;
+    }
+
+    OOPetrisRecordingInformation* information = oopetris_create_recording_information();
+
+    if (information == NULL) {
+        fprintf(stderr, "Couldn't allocate new RecordingInformation\n");
+        return EXIT_FAILURE;
+    }
+
+    const char* prompt = "> ";
+
+    State state = StateRoot;
+    void* data = NULL;
+
+    printf("OOPetris Recordings REPL v%s\nType 'help' for help\n", STRINGIFY(_REPL_VERSION));
+
+    while (true) {
+        char* input = readline(prompt);
+
+        if (input == NULL) { /* ctrl-d */
+            printf("\n");
+            break;
+        }
+
+        if (input[0] == '\0') {
+            continue;
+        }
+
+        const Command command = parse_command(&state, &data, input);
+
+        if (command == CommandNoOp) {
+            continue;
+        }
+
+        add_history(input);
+
+        switch (command) {
+            case CommandPrintHelp:
+                printf("Help:\n"
+                       "h, help, ?: display helper menu\n"
+                       "!: change insertion type, possible values:\n"
+                       "\ta: additional information\n"
+                       "\tr: records\n"
+                       "\ts: snapshots\n"
+                       "\th: headers\n"
+                       "s: Show current state\n"
+                       "<TODO>\n"
+
+
+                );
+                break;
+            case CommandNoOp:
+                break;
+
+            case CommandError:
+                if (data == NULL) {
+                    fprintf(stderr, "Error in displaying error, aborting!\n");
+                    return EXIT_FAILURE;
+                }
+
+                printf("Error: %s\n", (const char*) data);
+                free(data);
+                break;
+            case CommandGoToAddInf:
+                break;
+            case CommandInsertKey:
+                break;
+            default:
+                break;
+        }
+
+        free(input);
+    }
+
+
+    return EXIT_SUCCESS;
+}
+#else
+int write_to_file(const char* file) {
+    fprintf(stderr, "NOT SUPPORTED\n");
+    (void) file;
+    return EXIT_FAILURE;
+}
+#endif
+
+int main(int argc, char** argv) {
+
+    if (argc != 3) {
+        print_usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+
+
+    const char* mode_str = argv[1];
+
+    Mode mode = ModeRead;
+
+    if (strcmp(mode_str, "r") == 0 || strcmp(mode_str, "read") == 0) {
+        mode = ModeRead;
+    } else if (strcmp(mode_str, "w") == 0 || strcmp(mode_str, "write") == 0) {
+        mode = ModeWrite;
+    } else {
+        print_usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    const char* file = argv[2];
+
+    if (mode == ModeRead) {
+        return read_file(file);
+    } else if (mode == ModeWrite) {
+        return write_to_file(file);
+    } else {
+        print_usage(argv[0]);
+        return EXIT_FAILURE;
+    }
 }
