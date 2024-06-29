@@ -347,7 +347,7 @@ Command parse_command(State* state, void** data, const char* input) {
     do {                                                        \
         *data = malloc(ERROR_BUF_SIZE);                         \
         if (snprintf(*data, ERROR_BUF_SIZE, __VA_ARGS__) < 0) { \
-            free(data);                                         \
+            free(*data);                                         \
             *data = NULL;                                       \
         }                                                       \
         return CommandError;                                    \
