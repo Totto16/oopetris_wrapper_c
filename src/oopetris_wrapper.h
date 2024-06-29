@@ -114,7 +114,7 @@ typedef struct {
 typedef struct {
     uint8_t x;
     uint8_t y;
-} OOpetrisMinoPosition;
+} OOPetrisMinoPosition;
 
 
 //TODO(): once we only support C23 (which also the compiled lib has to support ), add underlying enum type uint8_t
@@ -129,7 +129,7 @@ typedef enum {
 } OOPetrisTetrominoType;
 
 typedef struct {
-    OOpetrisMinoPosition position;
+    OOPetrisMinoPosition position;
     OOPetrisTetrominoType type;
 } OOPetrisMino;
 
@@ -140,7 +140,7 @@ typedef struct {
     uint64_t simulation_step_index;
     uint32_t lines_cleared;
     uint8_t tetrion_index;
-} OOpetrisTetrionSnapshot;
+} OOPetrisTetrionSnapshot;
 
 typedef struct {
     uint64_t seed;
@@ -156,7 +156,7 @@ typedef struct {
 typedef struct {
     OOPetrisAdditionalInformation* information; //NOT AN ARRAY
     OOPetrisTetrionRecord* records;
-    OOpetrisTetrionSnapshot* snapshots;
+    OOPetrisTetrionSnapshot* snapshots;
     OOPetrisTetrionHeader* tetrion_headers;
     uint32_t version;
 } OOPetrisRecordingInformation;
@@ -211,6 +211,11 @@ size_t oopetris_array_len(void* const array);
         fn(obj);                   \
         obj = NULL;                \
     } while (false)
+
+
+// CREATION functions
+
+OOPetrisRecordingInformation* oopetris_create_recording_information(void);
 
 
 #ifdef __cplusplus

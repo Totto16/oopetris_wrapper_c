@@ -357,12 +357,12 @@ static OOPetrisTetrionRecord record_to_c(const recorder::Record& record) {
 static OOPetrisMino mino_to_c(const Mino& mino) {
     auto orig_pos = mino.position();
 
-    auto position = OOpetrisMinoPosition{ .x = orig_pos.x, .y = orig_pos.y };
+    auto position = OOPetrisMinoPosition{ .x = orig_pos.x, .y = orig_pos.y };
 
     return OOPetrisMino{ .position = position, .type = static_cast<OOPetrisTetrominoType>(mino.type()) };
 }
 
-static OOpetrisTetrionSnapshot snapshot_to_c(const TetrionSnapshot& snapshot) {
+static OOPetrisTetrionSnapshot snapshot_to_c(const TetrionSnapshot& snapshot) {
 
 
     // convert mino_stack
@@ -377,7 +377,7 @@ static OOpetrisTetrionSnapshot snapshot_to_c(const TetrionSnapshot& snapshot) {
     }
 
 
-    return OOpetrisTetrionSnapshot{ .level = snapshot.level(),
+    return OOPetrisTetrionSnapshot{ .level = snapshot.level(),
                                     .mino_stack = mino_stack,
                                     .score = snapshot.score(),
                                     .simulation_step_index = snapshot.simulation_step_index(),
@@ -562,4 +562,34 @@ void oopetris_free_grid_properties(OOPetrisGridProperties* properties) {
 
 size_t oopetris_array_len(void* const array) {
     return stbds_arrlenu(array);
+}
+
+// CREATION functions
+
+OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
+
+    auto* return_value = static_cast<OOPetrisRecordingInformation*>(malloc(sizeof(OOPetrisRecordingInformation)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+    return_value->version = recorder::Recording::current_supported_version_number;
+
+    stbds_rand_seed(time(NULL));
+    return_value->information = NULL;
+    stbds_sh_new_strdup(return_value->information);
+
+    return_value->records = NULL;
+    stbds_arrsetlen(return_value->records, 0);
+
+    return_value->snapshots = NULL;
+    stbds_arrsetlen(return_value->snapshots, 0);
+
+    return_value->tetrion_headers = NULL;
+    stbds_arrsetlen(return_value->tetrion_headers, 0);
+
+    return return_value;
 }
