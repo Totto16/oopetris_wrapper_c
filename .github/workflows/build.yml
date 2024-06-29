@@ -187,5 +187,5 @@ jobs:
 
       - name: Build Wrapper
         run: | 
-          meson setup -Dtests=false -Dexample=false build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' )  && 'enabled' || 'disabled' }} 
+          meson setup -Dtests=false -Dexample=true build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' )  && 'enabled' || 'disabled' }} 
           meson compile -C build
