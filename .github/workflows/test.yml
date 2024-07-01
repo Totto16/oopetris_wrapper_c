@@ -84,4 +84,4 @@ jobs:
 
       - name: Test for leaks with valgrind (Linux)
         run: | 
-            valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./build/example/example ./tests/files/correct.rec   
+            valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./build/example/example r ./tests/files/correct.rec   
