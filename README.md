@@ -1,4 +1,4 @@
-# OOpetris C Wrapper
+# OOPetris C Wrapper
 
 ![Code Coverage](https://raw.githubusercontent.com/Totto16/oopetris_wrapper_c/_xml_coverage_reports/data/main/badge.svg)
 
