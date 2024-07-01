@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build valgrind gcovr libcriterion-dev libfmt-dev  -y
+          sudo apt-get install ninja-build valgrind gcovr libcriterion-dev -y
 
       - name: Configure
         run: | 
@@ -61,6 +61,7 @@ jobs:
       - name: Test Wrapper
         run: | 
           ldd ./build/tests/tests
+          ls -sla  /usr/local/lib/x86_64-linux-gnu/
           meson test -C build --verbose
           ninja coverage -C build
 
