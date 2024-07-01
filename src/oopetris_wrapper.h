@@ -217,6 +217,46 @@ size_t oopetris_array_len(void* const array);
 
 OOPetrisRecordingInformation* oopetris_create_recording_information(void);
 
+void oopetris_add_information_field(
+        OOPetrisAdditionalInformation* additional_information,
+        const char* key,
+        OOPetrisAdditionalInformationField* value
+);
+
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_string(const char* value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_float(float value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_double(double value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(bool value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(uint8_t value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(int8_t value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(uint32_t value);
+
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(int32_t value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(uint64_t value);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(int64_t value);
+
+OOPetrisAdditionalInformationField** oopetris_additional_information_create_vector_with_size(size_t size);
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_vector(
+        OOPetrisAdditionalInformationField** value
+);
+
+void oopetris_add_record(OOPetrisRecordingInformation* information, OOPetrisTetrionRecord record);
+
+void oopetris_add_snapshot(OOPetrisRecordingInformation* information, OOPetrisTetrionSnapshot snapshot);
+
+void oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetrionHeader tetrion_header);
+
 
 #ifdef __cplusplus
 }

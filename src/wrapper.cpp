@@ -590,3 +590,217 @@ OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
 
     return return_value;
 }
+
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_string(const char* value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    const size_t length = strlen(value);
+
+    auto* string = static_cast<char*>(malloc(length + 1));
+
+    if (string == nullptr) {
+        free(string);
+        free(return_value);
+        return nullptr;
+    }
+
+#if defined(_MSC_VER)
+    std::memcpy(string, value, length + 1);
+#else
+    std::strcpy(string, value);
+#endif
+
+    return_value->type = OOPetrisAdditionalInformationType_String;
+    return_value->value.string = string;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_float(float value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_Float;
+    return_value->value.float_v = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_double(double value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_Double;
+    return_value->value.double_v = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(bool value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_Bool;
+    return_value->value.bool_v = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(uint8_t value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_U8;
+    return_value->value.u8 = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(int8_t value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_I8;
+    return_value->value.i8 = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(uint32_t value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_U32;
+    return_value->value.u32 = value;
+    return return_value;
+}
+
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(int32_t value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_I32;
+    return_value->value.i32 = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(uint64_t value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_U64;
+    return_value->value.u64 = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(int64_t value) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_I64;
+    return_value->value.i64 = value;
+    return return_value;
+}
+
+OOPetrisAdditionalInformationField** oopetris_additional_information_create_vector_with_size(size_t size) {
+    OOPetrisAdditionalInformationField** result = NULL;
+    stbds_arrsetlen(result, size);
+    return result;
+}
+
+OOPetrisAdditionalInformationField* oopetris_additional_information_create_vector(
+        OOPetrisAdditionalInformationField** value
+) {
+    auto* return_value =
+            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+
+
+    if (return_value == nullptr) {
+        free(return_value);
+        return nullptr;
+    }
+
+
+    return_value->type = OOPetrisAdditionalInformationType_Vector;
+    return_value->value.vector = value;
+    return return_value;
+}
+
+void oopetris_add_record(OOPetrisRecordingInformation* information, OOPetrisTetrionRecord record) {
+    stbds_arrput(information->records, record);
+}
+
+void oopetris_add_snapshot(OOPetrisRecordingInformation* information, OOPetrisTetrionSnapshot snapshot) {
+    stbds_arrput(information->snapshots, snapshot);
+}
+
+void oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetrionHeader tetrion_header) {
+    stbds_arrput(information->tetrion_headers, tetrion_header);
+}
