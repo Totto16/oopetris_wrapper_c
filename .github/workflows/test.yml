@@ -46,7 +46,7 @@ jobs:
       - name: Configure
         run: | 
             cd oopetris
-            meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Donly_build_libs=true
+            meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Donly_build_libs=true -Dprefix=/usr
 
       - name: Build and install Libs
         run: |
@@ -55,13 +55,11 @@ jobs:
 
       - name: Build Wrapper
         run: | 
-          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Dtests=true -Dexample=true
+          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Dtests=true -Dexample=true -Dprefix=/usr
           meson compile -C build
 
       - name: Test Wrapper
-        run: | 
-          strace ./build/tests/tests
-          ls -sla  /usr/local/lib/x86_64-linux-gnu/
+        run: |
           meson test -C build --verbose
           ninja coverage -C build
 
