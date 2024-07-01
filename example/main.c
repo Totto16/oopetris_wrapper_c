@@ -8,6 +8,7 @@
 #include <string.h>
 
 #if defined(_MSC_VER)
+#include <io.h>
 #include <windows.h>
 #else
 #include <sys/stat.h>
@@ -204,7 +205,11 @@ void print_mino_stack(const OOPetrisMino* const stack) {
 
 
     for (size_t y = 0; y < properties->height; ++y) {
+#if defined(_MSC_VER)
+        int result = _write(_fileno(stdout), buffer + (y * properties->width), properties->width);
+#else
         int result = write(STDOUT_FILENO, buffer + (y * properties->width), properties->width);
+#endif
         if (result < 0) {
             free(buffer);
             return;
@@ -347,7 +352,7 @@ Command parse_command(State* state, void** data, const char* input) {
     do {                                                        \
         *data = malloc(ERROR_BUF_SIZE);                         \
         if (snprintf(*data, ERROR_BUF_SIZE, __VA_ARGS__) < 0) { \
-            free(*data);                                         \
+            free(*data);                                        \
             *data = NULL;                                       \
         }                                                       \
         return CommandError;                                    \
