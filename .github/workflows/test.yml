@@ -60,7 +60,7 @@ jobs:
 
       - name: Test Wrapper
         run: | 
-          ldd ./build/tests/tests
+          strace ./build/tests/tests
           ls -sla  /usr/local/lib/x86_64-linux-gnu/
           meson test -C build --verbose
           ninja coverage -C build
