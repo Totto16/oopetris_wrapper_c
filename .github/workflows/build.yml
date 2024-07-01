@@ -171,7 +171,7 @@ jobs:
       - name: Configure
         run: | 
             cd oopetris
-            meson setup build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' )  && 'enabled' || 'disabled' }} -Donly_build_libs=true ${{ matrix.config.os == 'windows' && '-Db_vscrt=static_from_buildtype' || '' }}  ${{ (matrix.config.os == 'windows' && ( matrix.config.environment == 'mingw' || matrix.config.environment == 'ucrt' ))  && '-Dprefix=$RUNNER_TEMP/msys64${MINGW_PREFIX}/' || ''}}
+            meson setup build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' )  && 'enabled' || 'disabled' }} -Donly_build_libs=true ${{ matrix.config.os == 'windows' && '-Db_vscrt=from_buildtype' || '' }}  ${{ (matrix.config.os == 'windows' && ( matrix.config.environment == 'mingw' || matrix.config.environment == 'ucrt' ))  && '-Dprefix=$RUNNER_TEMP/msys64${MINGW_PREFIX}/' || ''}}
 
       - name: Build and install Libs
         if: matrix.config.os != 'ubuntu'
@@ -187,5 +187,5 @@ jobs:
 
       - name: Build Wrapper
         run: | 
-          meson setup -Dtests=false -Dexample=true build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' )  && 'enabled' || 'disabled' }} 
+          meson setup -Dtests=false -Dexample=true build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' )  && 'enabled' || 'disabled' }} ${{ matrix.config.os == 'windows' && '-Db_vscrt=from_buildtype' || '' }}
           meson compile -C build
