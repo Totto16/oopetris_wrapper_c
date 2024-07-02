@@ -1,7 +1,14 @@
 
 
+#include "core/game/mino_stack.hpp"
+#include "core/game/tetromino_type.hpp"
+#include "core/helper/input_event.hpp"
 #include "oopetris_wrapper.h"
 #include "opaque_types.h"
+#include "recordings/utility/additional_information.hpp"
+#include "recordings/utility/recording_writer.hpp"
+#include <filesystem>
+#include <memory>
 
 
 #if defined(__GNUC__)
@@ -818,4 +825,137 @@ void oopetris_add_snapshot(OOPetrisRecordingInformation* information, OOPetrisTe
 
 void oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetrionHeader tetrion_header) {
     stbds_arrput(information->tetrion_headers, tetrion_header);
+}
+
+static char* str_to_error(const std::string& error) {
+    auto* alloced_str = static_cast<char*>(malloc(error.size() + 1));
+
+    if (alloced_str == nullptr) {
+        return nullptr;
+    }
+
+#if defined(_MSC_VER)
+    std::memcpy(alloced_str, error.c_str(), error.size() + 1);
+#else
+    std::strcpy(alloced_str, error.c_str());
+#endif
+
+    return alloced_str;
+}
+
+static recorder::InformationValue additonal_information_field_to_cpp(const OOPetrisAdditionalInformationField* field) {
+    switch (oopetris_additional_information_field_get_type(field)) {
+        case OOPetrisAdditionalInformationType_String:
+            return recorder::InformationValue{ std::string{ oopetris_additional_information_field_get_string(field) } };
+        case OOPetrisAdditionalInformationType_Float:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_float(field) };
+        case OOPetrisAdditionalInformationType_Double:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_double(field) };
+        case OOPetrisAdditionalInformationType_Bool:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_bool(field) };
+        case OOPetrisAdditionalInformationType_U8:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_u8(field) };
+        case OOPetrisAdditionalInformationType_I8:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_i8(field) };
+        case OOPetrisAdditionalInformationType_U32:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_u32(field) };
+        case OOPetrisAdditionalInformationType_I32:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_i32(field) };
+        case OOPetrisAdditionalInformationType_U64:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_u64(field) };
+        case OOPetrisAdditionalInformationType_I64:
+            return recorder::InformationValue{ oopetris_additional_information_field_get_i64(field) };
+        case OOPetrisAdditionalInformationType_Vector: {
+
+            const auto raw_vector = oopetris_additional_information_field_get_vector(field);
+
+            const auto length = stbds_arrlenu(raw_vector);
+
+            std::vector<recorder::InformationValue> final_vector{};
+            final_vector.reserve(length);
+
+            for (std::size_t i = 0; i < length; ++i) {
+                const auto value = raw_vector[i];
+                final_vector.push_back(additonal_information_field_to_cpp(value));
+            }
+
+            return recorder::InformationValue{ final_vector };
+        }
+
+        default:
+            assert(false && "UNREACHABLE");
+    };
+}
+
+char* oopetris_write_to_file(OOPetrisRecordingInformation* information, const char* file_path, bool overwrite) {
+
+    std::vector<recorder::TetrionHeader> headers{};
+
+    for (std::size_t i = 0; i < stbds_arrlenu(information->tetrion_headers); ++i) {
+        const auto header = information->tetrion_headers[i];
+        headers.emplace_back(header.seed, header.starting_level);
+    }
+
+    recorder::AdditionalInformation additional_information{};
+
+    const auto keys = oopetris_additional_information_get_keys(information->information);
+
+
+    for (std::size_t i = 0; i < stbds_arrlenu(keys); ++i) {
+        const auto key = keys[i];
+        const auto value = additonal_information_field_to_cpp(
+                oopetris_additional_information_get_field(information->information, key)
+        );
+        additional_information.add_value(key, value);
+    }
+
+    oopetris_additional_information_keys_free(keys);
+
+    auto writer_value = recorder::RecordingWriter::get_writer(
+            std::filesystem::path{ file_path }, std::move(headers), std::move(additional_information), overwrite
+    );
+
+    if (not writer_value.has_value()) {
+        return str_to_error(writer_value.error());
+    }
+
+    auto writer = std::move(writer_value.value());
+
+    for (std::size_t i = 0; i < stbds_arrlenu(information->records); ++i) {
+
+        auto record = information->records[i];
+
+        auto res = writer.add_record(
+                record.tetrion_index, record.simulation_step_index, static_cast<InputEvent>(record.event)
+        );
+
+        if (not res.has_value()) {
+            return str_to_error(res.error());
+        }
+    }
+
+
+    for (std::size_t i = 0; i < stbds_arrlenu(information->snapshots); ++i) {
+
+        auto snapshot = information->snapshots[i];
+
+        MinoStack mino_stack{};
+
+        for (std::size_t j = 0; j < stbds_arrlenu(snapshot.mino_stack); ++j) {
+            const auto mino = snapshot.mino_stack[j];
+            mino_stack.set({ mino.position.x, mino.position.y }, static_cast<helper::TetrominoType>(mino.type));
+        }
+
+        auto core_information = std::make_unique<TetrionCoreInformation>(
+                snapshot.tetrion_index, snapshot.level, snapshot.score, snapshot.lines_cleared, std::move(mino_stack)
+        );
+
+        auto res = writer.add_snapshot(snapshot.simulation_step_index, std::move(core_information));
+        if (not res.has_value()) {
+            return str_to_error(res.error());
+        }
+    }
+
+    //TODO:
+    return NULL;
 }

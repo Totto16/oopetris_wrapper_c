@@ -1134,6 +1134,18 @@ int write_to_file(const char* file, bool failOnREPLError) {
         free(input);
     }
 
+    char* write_error = oopetris_write_to_file(information, file, false);
+
+    if (write_error != NULL) {
+        fprintf(stderr, "An error occured, while trying to write information to file '%s': %s\n", file, write_error);
+        free(write_error);
+        oopetris_free_recording_information(information);
+        return EXIT_FAILURE;
+    }
+
+    oopetris_free_recording_information(information);
+
+
 
     return EXIT_SUCCESS;
 }

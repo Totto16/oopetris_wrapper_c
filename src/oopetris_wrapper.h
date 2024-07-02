@@ -259,6 +259,8 @@ void oopetris_add_snapshot(OOPetrisRecordingInformation* information, OOPetrisTe
 
 void oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetrionHeader tetrion_header);
 
+char* oopetris_write_to_file(OOPetrisRecordingInformation* information, const char* file_path, bool overwrite);
+
 
 #ifdef __cplusplus
 }
