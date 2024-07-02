@@ -718,7 +718,7 @@ Command parse_command(State* state, void** data, const char* input) {
 
                     case 's': {
 
-                        if (index + 2 >= length) {
+                        if (index + 1 >= length) {
                             RETURN_ERROR("To short ':' command: missing third argument");
                         }
 
@@ -1058,12 +1058,18 @@ int write_to_file(const char* file, bool failOnREPLError) {
         return EXIT_FAILURE;
     }
 
-    const char* prompt = "> ";
+    int is_tty = isatty(STDIN_FILENO);
+
+    //TODO:maybe pipe stdout to /dev/null in no tty case
+
+    const char* prompt = is_tty ? "> " : NULL;
 
     State state = StateRoot;
     void* data = NULL;
 
-    printf("OOPetris Recordings REPL v%s\nType 'help' for help\n", STRINGIFY(_REPL_VERSION));
+    if (is_tty) {
+        printf("OOPetris Recordings REPL v%s\nType 'help' for help\n", STRINGIFY(_REPL_VERSION));
+    }
 
     while (true) {
         char* input = readline(prompt);

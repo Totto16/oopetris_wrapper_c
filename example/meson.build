@@ -1,5 +1,5 @@
 example_deps = [liboopetris_c_wrapper_dep]
-example_c_flags = ['-D_REPL_VERSION=0.1.0']
+example_c_flags = ['-D_REPL_VERSION=0.1.5']
 readline_dep = dependency('readline', required: false)
 
 if readline_dep.found()
