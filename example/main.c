@@ -2,6 +2,7 @@
 #include "oopetris_wrapper.h"
 #include <assert.h>
 #include <inttypes.h>
+#include <readline/chardefs.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -338,11 +339,87 @@ typedef enum {
     CommandNoOp,
     CommandError,
     //
-    CommandGoToAddInf,
-    CommandInsertKey,
+    CommandInsertAddInfo,
     //
     //TODO
 } Command;
+
+typedef enum { TempDataEnumAddInfoKey } TempDataEnum;
+
+typedef struct {
+    TempDataEnum type;
+    union {
+        struct {
+            char* key;
+        } add_info_key;
+        //
+    } value;
+
+} TempData;
+
+typedef struct {
+    char* key;
+    OOPetrisAdditionalInformationField* value;
+} AdditionalInformationData;
+
+static char* copy_str(const char* input) {
+    size_t size = strlen(input);
+    char* string = (char*) malloc(size + 1);
+
+    if (string == NULL) {
+        return NULL;
+    }
+
+    strcpy(string, input);
+
+    return string;
+}
+
+
+static float* get_float(const char* input) {
+
+
+    char* end;
+
+    float res = strtof(input, &end);
+
+    if (end == input) {
+        return NULL;
+    }
+
+    float* return_value = malloc(sizeof(float));
+
+    if (return_value == NULL) {
+        return NULL;
+    }
+
+    *return_value = res;
+
+    return return_value;
+}
+
+
+static double* get_double(const char* input) {
+
+
+    char* end;
+
+    double res = strtod(input, &end);
+
+    if (end == input) {
+        return NULL;
+    }
+
+    double* return_value = malloc(sizeof(double));
+
+    if (return_value == NULL) {
+        return NULL;
+    }
+
+    *return_value = res;
+
+    return return_value;
+}
 
 
 Command parse_command(State* state, void** data, const char* input) {
@@ -358,6 +435,13 @@ Command parse_command(State* state, void** data, const char* input) {
         return CommandError;                                    \
     } while (false)
 
+
+#define ASSERT_OR_ERROR(check, ...) \
+    if (!(check)) {                 \
+        RETURN_ERROR(__VA_ARGS__);  \
+    }
+
+#define VERIFY_MALLOC(var) ASSERT_OR_ERROR((var) != NULL, "Malloc failed")
 
     if (strcmp(input, "h") == 0 || strcmp(input, "help") == 0 || strcmp(input, "?") == 0) {
         return CommandPrintHelp;
@@ -396,15 +480,16 @@ Command parse_command(State* state, void** data, const char* input) {
             RETURN_ERROR("To short '!' command: missing second argument");
         }
 
-        char type = input[1];
-
-        if (type == ' ') {
-            if (length < 3) {
+        size_t index = 1;
+        while (isspace(input[index])) {
+            if (index + 1 >= length) {
                 RETURN_ERROR("To short '!' command: missing second argument");
             }
 
-            type = input[2];
+            ++index;
         }
+
+        char type = input[index];
 
         switch (type) {
             case 'a':
@@ -418,6 +503,13 @@ Command parse_command(State* state, void** data, const char* input) {
                 return CommandNoOp;
             case 'h':
                 *state = StateHeaders;
+                return CommandNoOp;
+            case '?':
+                printf("Possible insertion types:\n"
+                       "\ta: additional information\n"
+                       "\tr: records\n"
+                       "\ts: snapshots\n"
+                       "\th: headers\n");
                 return CommandNoOp;
             default:
                 RETURN_ERROR("Unknown Insertion type '%c'", type);
@@ -436,26 +528,108 @@ Command parse_command(State* state, void** data, const char* input) {
                     RETURN_ERROR("To short ':' command: missing second argument");
                 }
 
-                char type = input[1];
-
-                if (type == ' ') {
-                    if (length < 3) {
+                size_t index = 1;
+                while (isspace(input[index])) {
+                    if (index + 1 >= length) {
                         RETURN_ERROR("To short ':' command: missing second argument");
                     }
 
-                    type = input[2];
+                    ++index;
                 }
 
-                //TODO:
-                // :( ?)k (.*) key
+                char type = input[index];
+
+                OOPetrisAdditionalInformationField* field = NULL;
+
 
                 switch (type) {
-                    case 'k':
-                        //TODO
-                        return CommandNoOp;
+                    case 'k': { // key
 
+                        // note on errot here, no free is done, since data can be anything, just freeing the pointer want really help
+                        ASSERT_OR_ERROR((*data == NULL), "Unexpected state in additional info: add key")
+
+                        if (index + 2 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
+
+                        const char* key = input + index + 2;
+                        char* malloced_str = copy_str(key);
+                        VERIFY_MALLOC(malloced_str);
+
+                        TempData* return_value = (TempData*) malloc(sizeof(TempData));
+                        VERIFY_MALLOC(return_value);
+
+                        return_value->type = TempDataEnumAddInfoKey;
+                        return_value->value.add_info_key.key = malloced_str;
+
+                        *data = return_value;
+                        return CommandNoOp;
+                    }
+                    case 'f': {
+
+                        if (index + 2 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
+
+                        const char* float_v = input + index + 2;
+
+                        float* value = get_float(float_v);
+                        ASSERT_OR_ERROR(value != NULL, "Not a float: %s", float_v);
+
+                        field = oopetris_additional_information_create_float(*value);
+                        free(value);
+                        goto return_field_value;
+                    }
+                    case 'd': {
+
+                        if (index + 2 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
+
+                        const char* double_v = input + index + 2;
+
+                        double* value = get_double(double_v);
+                        ASSERT_OR_ERROR(value != NULL, "Not a double: %s", double_v);
+
+                        field = oopetris_additional_information_create_double(*value);
+                        free(value);
+                        goto return_field_value;
+                    }
+
+
+                    return_field_value: {
+
+                        if (*data == NULL) {
+                            RETURN_ERROR("Unexpected state in additional info: add float");
+                        }
+
+                        TempData* temp = (TempData*) *data;
+
+                        if (temp->type == TempDataEnumAddInfoKey) {
+                            // construct a normal CommandInsertAddInfo
+                        }
+                        //TODO; constcuct a vector
+
+
+                        AdditionalInformationData* return_value =
+                                (AdditionalInformationData*) malloc(sizeof(AdditionalInformationData));
+                        VERIFY_MALLOC(return_value);
+
+                        return_value->key = temp->value.add_info_key.key;
+                        return_value->value = field;
+                        free(temp);
+
+                        *data = return_value;
+                        return CommandInsertAddInfo;
+                    }
                     default:
-                        RETURN_ERROR("Unknown ? type '%c'", type);
+                        RETURN_ERROR("Unknown type '%c'", type);
                 }
             }
 
@@ -463,11 +637,11 @@ Command parse_command(State* state, void** data, const char* input) {
         }
 
         case StateRecords:
-            return CommandNoOp;
+            RETURN_ERROR("NOT IMPLEMENTED YET");
         case StateSnapshots:
-            return CommandNoOp;
+            RETURN_ERROR("NOT IMPLEMENTED YET");
         case StateHeaders:
-            return CommandNoOp;
+            RETURN_ERROR("NOT IMPLEMENTED YET");
         default:
             RETURN_ERROR("Unknown state");
     }
@@ -477,7 +651,7 @@ Command parse_command(State* state, void** data, const char* input) {
 #define STRINGIFY_HELPER_(a) #a
 
 
-int write_to_file(const char* file) {
+int write_to_file(const char* file, bool failOnREPLError) {
 
     if (file_exists(file)) {
         fprintf(stderr, "File already exists, can't overwrite it!\n");
@@ -528,10 +702,7 @@ int write_to_file(const char* file) {
                        "\ts: snapshots\n"
                        "\th: headers\n"
                        "s: Show current state\n"
-                       "<TODO>\n"
-
-
-                );
+                       "<TODO>\n");
                 break;
             case CommandNoOp:
                 break;
@@ -544,11 +715,20 @@ int write_to_file(const char* file) {
 
                 printf("Error: %s\n", (const char*) data);
                 free(data);
+                data = NULL;
+                if (failOnREPLError) {
+                    return EXIT_FAILURE;
+                }
                 break;
-            case CommandGoToAddInf:
+            case CommandInsertAddInfo: {
+                AdditionalInformationData* ptr = (AdditionalInformationData*) data;
+                oopetris_add_information_field(information->information, ptr->key, ptr->value);
+                free(ptr->key);
+                free(ptr->value);
+                free(ptr);
+                data = NULL;
                 break;
-            case CommandInsertKey:
-                break;
+            }
             default:
                 break;
         }
@@ -560,9 +740,10 @@ int write_to_file(const char* file) {
     return EXIT_SUCCESS;
 }
 #else
-int write_to_file(const char* file) {
+int write_to_file(const char* file, bool failOnREPLError) {
     fprintf(stderr, "NOT SUPPORTED\n");
     (void) file;
+    (void) failOnREPLError;
     return EXIT_FAILURE;
 }
 #endif
@@ -593,7 +774,7 @@ int main(int argc, char** argv) {
     if (mode == ModeRead) {
         return read_file(file);
     } else if (mode == ModeWrite) {
-        return write_to_file(file);
+        return write_to_file(file, true);
     } else {
         print_usage(argv[0]);
         return EXIT_FAILURE;

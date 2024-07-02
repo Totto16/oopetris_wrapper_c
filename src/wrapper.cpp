@@ -591,6 +591,15 @@ OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
     return return_value;
 }
 
+void oopetris_add_information_field(
+        OOPetrisAdditionalInformation* additional_information,
+        const char* key,
+        OOPetrisAdditionalInformationField* value
+) {
+
+    stbds_shput(additional_information, key, value);
+}
+
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_string(const char* value) {
     auto* return_value =
