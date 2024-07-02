@@ -35,9 +35,14 @@ struct OOPetrisAdditionalInformationFieldImpl {
     } value;
 };
 
-struct OOPetrisAdditionalInformationImpl {
+typedef struct {
     char* key;
     OOPetrisAdditionalInformationField* value;
+} OOPetrisAdditionalInformationValue;
+
+
+struct OOPetrisAdditionalInformationImpl {
+    OOPetrisAdditionalInformationValue* values;
 };
 
 

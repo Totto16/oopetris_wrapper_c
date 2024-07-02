@@ -664,6 +664,19 @@ Command parse_command(State* state, void** data, const char* input) {
                         goto return_field_value;
                     }
 
+                    case 's': {
+
+                        if (index + 2 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
+
+                        const char* value = input + index + 2;
+                        field = oopetris_additional_information_create_string(value);
+                        goto return_field_value;
+                    }
+
                     case 'u': {
                         if (index + 3 >= length) {
                             RETURN_ERROR("To short ':' command: missing third argument");
@@ -915,7 +928,6 @@ int write_to_file(const char* file, bool failOnREPLError) {
                 AdditionalInformationData* ptr = (AdditionalInformationData*) data;
                 oopetris_add_information_field(information->information, ptr->key, ptr->value);
                 free(ptr->key);
-                free(ptr->value);
                 free(ptr);
                 data = NULL;
                 break;

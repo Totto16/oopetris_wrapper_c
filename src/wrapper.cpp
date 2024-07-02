@@ -213,17 +213,24 @@ static OOPetrisAdditionalInformation* recording_reader_get_additional_informatio
 
     stbds_rand_seed(time(NULL));
 
-    OOPetrisAdditionalInformation* result = NULL;
+    OOPetrisAdditionalInformation* result =
+            (OOPetrisAdditionalInformation*) malloc(sizeof(OOPetrisAdditionalInformation));
+
+    if (result == nullptr) {
+        return nullptr;
+    }
+
+    result->values = NULL;
 
     //NOTE: We use stbds_sh_new_strdup, so keys are automatically copied (malloced) and freed and we don't need to manage those
-    stbds_sh_new_strdup(result);
+    stbds_sh_new_strdup(result->values);
 
 
     for (const auto& [key, value] : information) {
 
         auto* insert_value = information_value_to_c(value);
 
-        stbds_shput(result, key.c_str(), insert_value);
+        stbds_shput(result->values, key.c_str(), insert_value);
     }
 
     return result;
@@ -233,13 +240,13 @@ const char** oopetris_additional_information_get_keys(OOPetrisAdditionalInformat
 
     const char** result_arr = NULL;
 
-    const auto length = stbds_shlen(information);
+    const auto length = stbds_shlen(information->values);
 
     stbds_arrsetlen(result_arr, length);
 
     for (int i = 0; i < length; ++i) {
 
-        result_arr[i] = information[i].key;
+        result_arr[i] = information->values[i].key;
     }
 
 
@@ -253,13 +260,13 @@ void oopetris_additional_information_keys_free(const char** keys) {
 const OOPetrisAdditionalInformationField*
 oopetris_additional_information_get_field(OOPetrisAdditionalInformation* information, const char* key) {
 
-    const auto index = stbds_shgeti(information, key);
+    const auto index = stbds_shgeti(information->values, key);
 
     if (index < 0) {
         return nullptr;
     }
 
-    return information[index].value;
+    return information->values[index].value;
 }
 
 
@@ -338,12 +345,13 @@ const OOPetrisAdditionalInformationField* const* oopetris_additional_information
 static void oopetris_additional_information_free(OOPetrisAdditionalInformation* information) {
 
 
-    for (int i = 0; i < stbds_shlen(information); ++i) {
+    for (int i = 0; i < stbds_shlen(information->values); ++i) {
 
-        free_additional_value_field(information[i].value);
+        free_additional_value_field(information->values[i].value);
     }
 
-    stbds_shfree(information);
+    stbds_shfree(information->values);
+    free(information);
 }
 
 static OOPetrisTetrionRecord record_to_c(const recorder::Record& record) {
@@ -575,7 +583,17 @@ OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
 
     stbds_rand_seed(time(NULL));
     return_value->information = NULL;
-    stbds_sh_new_strdup(return_value->information);
+
+
+    return_value->information = (OOPetrisAdditionalInformation*) malloc(sizeof(OOPetrisAdditionalInformation));
+
+    if (return_value->information == nullptr) {
+        return nullptr;
+    }
+
+    return_value->information->values = NULL;
+
+    stbds_sh_new_strdup(return_value->information->values);
 
     return_value->records = NULL;
 
@@ -592,7 +610,7 @@ void oopetris_add_information_field(
         OOPetrisAdditionalInformationField* value
 ) {
 
-    stbds_shput(additional_information, key, value);
+    stbds_shput(additional_information->values, key, value);
 }
 
 
