@@ -483,6 +483,31 @@ static uint64_t* get_ulong(const char* input) {
 }
 
 
+static bool* get_bool(const char* input) {
+
+    bool res = false;
+
+    if (strcmp(input, "true") == 0 || strcmp(input, "t") == 0 || strcmp(input, "1") == 0) {
+        res = true;
+    } else if (strcmp(input, "false") == 0 || strcmp(input, "f") == 0 || strcmp(input, "0") == 0) {
+        res = false;
+    } else {
+        return NULL;
+    }
+
+
+    bool* return_value = malloc(sizeof(bool));
+
+    if (return_value == NULL) {
+        return NULL;
+    }
+
+    *return_value = res;
+
+    return return_value;
+}
+
+
 Command parse_command(State* state, void** data, const char* input) {
 
 #define ERROR_BUF_SIZE 0x200
@@ -642,6 +667,24 @@ Command parse_command(State* state, void** data, const char* input) {
                         ASSERT_OR_ERROR(value != NULL, "Not a float: %s", float_v);
 
                         field = oopetris_additional_information_create_float(*value);
+                        free(value);
+                        goto return_field_value;
+                    }
+
+                    case 'b': {
+
+                        if (index + 2 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
+
+                        const char* bool_v = input + index + 2;
+
+                        bool* value = get_bool(bool_v);
+                        ASSERT_OR_ERROR(value != NULL, "Not a bool: %s", bool_v);
+
+                        field = oopetris_additional_information_create_bool(*value);
                         free(value);
                         goto return_field_value;
                     }
