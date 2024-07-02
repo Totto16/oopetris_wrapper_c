@@ -85,7 +85,6 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -94,7 +93,6 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
                                    auto* string = static_cast<char*>(malloc(value.size() + 1));
 
                                    if (string == nullptr) {
-                                       free(string);
                                        free(return_value);
                                        return nullptr;
                                    }
@@ -398,7 +396,6 @@ static OOPetrisRecordingInformation* recording_reader_to_c(const recorder::Recor
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -452,7 +449,6 @@ OOPetrisRecordingReturnValue* oopetris_get_recording_information(const char* fil
     auto* return_value = static_cast<OOPetrisRecordingReturnValue*>(malloc(sizeof(OOPetrisRecordingReturnValue)));
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -572,7 +568,6 @@ OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -607,7 +602,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_strin
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -617,7 +611,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_strin
     auto* string = static_cast<char*>(malloc(length + 1));
 
     if (string == nullptr) {
-        free(string);
         free(return_value);
         return nullptr;
     }
@@ -639,7 +632,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_float
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -655,7 +647,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_doubl
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -671,7 +662,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -687,7 +677,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(ui
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -703,7 +692,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(in
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -719,7 +707,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(u
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -736,7 +723,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(i
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -752,7 +738,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(u
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -768,7 +753,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(i
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
@@ -792,7 +776,6 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_vecto
 
 
     if (return_value == nullptr) {
-        free(return_value);
         return nullptr;
     }
 
