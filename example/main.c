@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
-#include <readline/chardefs.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
