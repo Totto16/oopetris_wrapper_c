@@ -780,6 +780,11 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(i
     return return_value;
 }
 
+OOPetrisAdditionalInformationField** oopetris_additional_information_create_empty_vector(void) {
+    OOPetrisAdditionalInformationField** result = NULL;
+    return result;
+}
+
 OOPetrisAdditionalInformationField** oopetris_additional_information_create_vector_with_size(size_t size) {
     OOPetrisAdditionalInformationField** result = NULL;
     stbds_arrsetlen(result, size);

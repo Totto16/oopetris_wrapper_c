@@ -1,5 +1,6 @@
 
 #include "oopetris_wrapper.h"
+
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -344,7 +345,7 @@ typedef enum {
     //TODO
 } Command;
 
-typedef enum { TempDataEnumAddInfoKey } TempDataEnum;
+typedef enum { TempDataEnumAddInfoKey, TempDataEnumVector } TempDataEnum;
 
 typedef struct {
     TempDataEnum type;
@@ -352,6 +353,10 @@ typedef struct {
         struct {
             char* key;
         } add_info_key;
+        struct {
+            char* key;
+            OOPetrisAdditionalInformationField*** vectors;
+        } vector;
         //
     } value;
 
@@ -626,11 +631,12 @@ Command parse_command(State* state, void** data, const char* input) {
 
                 OOPetrisAdditionalInformationField* field = NULL;
 
+                const char* adding = "<unknown>";
 
                 switch (type) {
                     case 'k': { // key
 
-                        // note on errot here, no free is done, since data can be anything, just freeing the pointer want really help
+                        // note on error here, no free is done, since data can be anything, just freeing the pointer want really help
                         ASSERT_OR_ERROR((*data == NULL), "Unexpected state in additional info: add key")
 
                         if (index + 2 >= length) {
@@ -667,24 +673,7 @@ Command parse_command(State* state, void** data, const char* input) {
 
                         field = oopetris_additional_information_create_float(*value);
                         free(value);
-                        goto return_field_value;
-                    }
-
-                    case 'b': {
-
-                        if (index + 2 >= length) {
-                            RETURN_ERROR("To short ':' command: missing third argument");
-                        }
-
-                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
-
-                        const char* bool_v = input + index + 2;
-
-                        bool* value = get_bool(bool_v);
-                        ASSERT_OR_ERROR(value != NULL, "Not a bool: %s", bool_v);
-
-                        field = oopetris_additional_information_create_bool(*value);
-                        free(value);
+                        adding = "float";
                         goto return_field_value;
                     }
 
@@ -703,8 +692,29 @@ Command parse_command(State* state, void** data, const char* input) {
 
                         field = oopetris_additional_information_create_double(*value);
                         free(value);
+                        adding = "double";
                         goto return_field_value;
                     }
+
+                    case 'b': {
+
+                        if (index + 2 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        ASSERT_OR_ERROR(isspace(input[index + 1]), "Expected space as delimiter for the third argument")
+
+                        const char* bool_v = input + index + 2;
+
+                        bool* value = get_bool(bool_v);
+                        ASSERT_OR_ERROR(value != NULL, "Not a bool: %s", bool_v);
+
+                        field = oopetris_additional_information_create_bool(*value);
+                        free(value);
+                        adding = "bool";
+                        goto return_field_value;
+                    }
+
 
                     case 's': {
 
@@ -716,6 +726,7 @@ Command parse_command(State* state, void** data, const char* input) {
 
                         const char* value = input + index + 2;
                         field = oopetris_additional_information_create_string(value);
+                        adding = "string";
                         goto return_field_value;
                     }
 
@@ -776,6 +787,7 @@ Command parse_command(State* state, void** data, const char* input) {
                         }
 
                         free(value);
+                        adding = "unsigned int";
                         goto return_field_value;
                     }
 
@@ -845,34 +857,169 @@ Command parse_command(State* state, void** data, const char* input) {
                         }
 
                         free(value);
+                        adding = "int";
                         goto return_field_value;
+                    }
+
+                    case 'v': {
+
+                        if (index + 1 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        if (input[index + 1] == 'b') {
+
+                            if (*data == NULL) {
+                                RETURN_ERROR("Unexpected state in additional info, data NULL: add vector begin");
+                            }
+
+                            TempData* temp = (TempData*) *data;
+
+                            if (temp->type == TempDataEnumAddInfoKey) {
+
+
+                                char* temp_key = temp->value.add_info_key.key;
+
+                                memset(temp, '\0', sizeof(TempData));
+
+                                temp->type = TempDataEnumVector;
+                                temp->value.vector.key = temp_key;
+                                temp->value.vector.vectors = NULL;
+
+
+                                OOPetrisAdditionalInformationField** first_elem =
+                                        oopetris_additional_information_create_empty_vector();
+
+                                stbds_arrput(temp->value.vector.vectors, first_elem);
+
+                                return CommandNoOp;
+
+                            } else if (temp->type == TempDataEnumVector) {
+
+                                OOPetrisAdditionalInformationField** first_elem =
+                                        oopetris_additional_information_create_empty_vector();
+
+                                stbds_arrput(temp->value.vector.vectors, first_elem);
+                                return CommandNoOp;
+
+                            } else {
+                                RETURN_ERROR("Unexpected state in additional info: add vector begin");
+                            }
+
+
+                        } else if (input[index + 1] == 'e') {
+
+
+                            if (*data == NULL) {
+                                RETURN_ERROR("Unexpected state in additional info, data NULL: add vector end");
+                            }
+
+                            TempData* temp = (TempData*) *data;
+
+
+                            if (temp->type == TempDataEnumAddInfoKey) {
+
+                                RETURN_ERROR(
+                                        "Unexpected state in additional info: add vector end, can't be proceeded by a "
+                                        "key!"
+                                );
+
+                            } else if (temp->type == TempDataEnumVector) {
+
+                                size_t length = stbds_arrlenu(temp->value.vector.vectors);
+
+                                if (length == 0) {
+
+                                    RETURN_ERROR("UNREACHABLE, programming error");
+                                } else if (length == 1) {
+
+
+                                    OOPetrisAdditionalInformationField** final_vec =
+                                            stbds_arrpop(temp->value.vector.vectors);
+
+                                    OOPetrisAdditionalInformationField* field =
+                                            oopetris_additional_information_create_vector(final_vec);
+
+
+                                    AdditionalInformationData* return_value =
+                                            (AdditionalInformationData*) malloc(sizeof(AdditionalInformationData));
+                                    VERIFY_MALLOC(return_value);
+
+                                    return_value->key = temp->value.vector.key;
+                                    return_value->value = field;
+
+                                    stbds_arrfree(temp->value.vector.vectors);
+                                    free(temp);
+
+                                    *data = return_value;
+                                    return CommandInsertAddInfo;
+
+                                } else {
+
+                                    OOPetrisAdditionalInformationField** last_vec =
+                                            stbds_arrpop(temp->value.vector.vectors);
+
+                                    OOPetrisAdditionalInformationField* field =
+                                            oopetris_additional_information_create_vector(last_vec);
+
+                                    stbds_arrput(temp->value.vector.vectors[length - 2], field);
+                                    return CommandNoOp;
+                                }
+
+
+                            } else {
+                                RETURN_ERROR("Unexpected state in additional info: add vector end");
+                            }
+
+
+                        } else {
+                            RETURN_ERROR("Invalid command: %s", input + index);
+                        }
                     }
 
 
                     return_field_value: {
 
                         if (*data == NULL) {
-                            RETURN_ERROR("Unexpected state in additional info: add float");
+                            RETURN_ERROR("Unexpected state in additional info, data NULL: add %s", adding);
                         }
 
                         TempData* temp = (TempData*) *data;
 
                         if (temp->type == TempDataEnumAddInfoKey) {
                             // construct a normal CommandInsertAddInfo
+
+                            AdditionalInformationData* return_value =
+                                    (AdditionalInformationData*) malloc(sizeof(AdditionalInformationData));
+                            VERIFY_MALLOC(return_value);
+
+                            return_value->key = temp->value.add_info_key.key;
+                            return_value->value = field;
+                            free(temp);
+
+                            *data = return_value;
+                            return CommandInsertAddInfo;
+
+                        } else if (temp->type == TempDataEnumVector) {
+                            // add the field to the vector
+
+                            size_t length = stbds_arrlenu(temp->value.vector.vectors);
+
+                            if (length == 0) {
+
+                                RETURN_ERROR("UNREACHABLE, programming error");
+                            }
+
+                            stbds_arrput(temp->value.vector.vectors[length - 1], field);
+
+                            return CommandNoOp;
+
+                        } else {
+                            RETURN_ERROR("Unexpected state in additional info: add %s", adding);
                         }
+
+
                         //TODO; constcuct a vector
-
-
-                        AdditionalInformationData* return_value =
-                                (AdditionalInformationData*) malloc(sizeof(AdditionalInformationData));
-                        VERIFY_MALLOC(return_value);
-
-                        return_value->key = temp->value.add_info_key.key;
-                        return_value->value = field;
-                        free(temp);
-
-                        *data = return_value;
-                        return CommandInsertAddInfo;
                     }
                     default:
                         RETURN_ERROR("Unknown type '%c'", type);

@@ -245,6 +245,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(u
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(int64_t value);
 
+OOPetrisAdditionalInformationField** oopetris_additional_information_create_empty_vector(void);
+
 OOPetrisAdditionalInformationField** oopetris_additional_information_create_vector_with_size(size_t size);
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_vector(
