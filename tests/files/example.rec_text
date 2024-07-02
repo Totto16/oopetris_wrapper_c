@@ -1,0 +1,64 @@
+!a
+
+:k a float
+:f 1.34252
+
+:k a double 
+:d 0.3213414111
+
+
+:k a number
+:u8 0x12
+
+:k a number 2
+:i32 -121313
+
+:k a normal string with spaces
+:s this is the value
+
+:k a bool
+:b true
+
+:k a simple vector 
+:vb
+
+:d 121211212121
+:s a string
+:b true
+:b false
+:ve
+
+
+:k a nested vector 
+:vb
+
+:d 121211212121
+:s a string
+:b true
+:b false
+
+:vb
+
+:b true
+:d 42
+:u64 0xFFFFFFFF
+
+:ve
+
+:ve
+
+
+:k a
+:vb
+
+:d 1
+:f 1
+:s 
+:b t
+:b 1
+:b f
+:b 0
+:u8 0
+:i8 -1
+:i8 123
+:u8 0xFF

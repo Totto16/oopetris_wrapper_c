@@ -31,7 +31,7 @@ jobs:
           sudo ./llvm.sh 18
           sudo apt-get install libc++-18* libc++abi*18* llvm-18 -y
           echo "CC=clang-18" >> "$GITHUB_ENV"
-            echo "CXX=clang++-18" >> "$GITHUB_ENV"
+          echo "CXX=clang++-18" >> "$GITHUB_ENV"
               
         # NOTE: meson has no dependencies, so --break-system-packages doesn't really break anything!
       - name: Setup meson
@@ -84,4 +84,6 @@ jobs:
 
       - name: Test for leaks with valgrind (Linux)
         run: | 
-            valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./build/example/example r ./tests/files/correct.rec   
+            valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./build/example/example r ./tests/files/correct.rec
+            valgrind --tool=memcheck --leak-check=full --error-exitcode=1 cat ./tests/files/example.rec_text | ./build/example/example w ./test.rec
+            valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./build/example/example r ./test.rec
