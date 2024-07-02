@@ -2,6 +2,7 @@
 #include "oopetris_wrapper.h"
 #include <assert.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <readline/chardefs.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -387,6 +388,10 @@ static float* get_float(const char* input) {
         return NULL;
     }
 
+    if (*end != '\0') {
+        return NULL;
+    }
+
     float* return_value = malloc(sizeof(float));
 
     if (return_value == NULL) {
@@ -411,6 +416,62 @@ static double* get_double(const char* input) {
     }
 
     double* return_value = malloc(sizeof(double));
+
+    if (return_value == NULL) {
+        return NULL;
+    }
+
+    if (*end != '\0') {
+        return NULL;
+    }
+
+    *return_value = res;
+
+    return return_value;
+}
+
+static int64_t* get_long(const char* input) {
+    char* end;
+
+    static_assert(sizeof(int64_t) == sizeof(long), "int64_t is an alias of long");
+    long res = strtol(input, &end, 0);
+
+    if (end == input) {
+        return NULL;
+    }
+
+    if (*end != '\0') {
+        return NULL;
+    }
+
+    long* return_value = malloc(sizeof(long));
+
+    if (return_value == NULL) {
+        return NULL;
+    }
+
+    *return_value = res;
+
+    return return_value;
+}
+
+static uint64_t* get_ulong(const char* input) {
+
+
+    char* end;
+
+    static_assert(sizeof(uint64_t) == sizeof(unsigned long), "uint64_t is an alias of unsigned  long");
+    unsigned long res = strtoul(input, &end, 0);
+
+    if (end == input) {
+        return NULL;
+    }
+
+    if (*end != '\0') {
+        return NULL;
+    }
+
+    unsigned long* return_value = malloc(sizeof(unsigned long));
 
     if (return_value == NULL) {
         return NULL;
@@ -584,6 +645,7 @@ Command parse_command(State* state, void** data, const char* input) {
                         free(value);
                         goto return_field_value;
                     }
+
                     case 'd': {
 
                         if (index + 2 >= length) {
@@ -598,6 +660,135 @@ Command parse_command(State* state, void** data, const char* input) {
                         ASSERT_OR_ERROR(value != NULL, "Not a double: %s", double_v);
 
                         field = oopetris_additional_information_create_double(*value);
+                        free(value);
+                        goto return_field_value;
+                    }
+
+                    case 'u': {
+                        if (index + 3 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        uint64_t limit_max = 0;
+                        const char* start_char = input + index;
+                        uint8_t type = 0;
+
+                        if (input[index + 2] == ' ') {
+                            if (input[index + 1] == '8') {
+                                limit_max = UCHAR_MAX;
+                                type = 1;
+                            } else {
+                                RETURN_ERROR("Unrecognized number command: u%c", input[index + 1]);
+                            }
+                            start_char = input + index + 3;
+                        } else if (input[index + 3] == ' ') {
+                            if (input[index + 1] == '3' && input[index + 2] == '2') {
+                                limit_max = UINT_MAX;
+                                type = 2;
+                            } else if (input[index + 1] == '6' && input[index + 2] == '4') {
+                                limit_max = ULLONG_MAX;
+                                type = 3;
+                            } else {
+                                RETURN_ERROR("Unrecognized number command: u%c%c", input[index + 1], input[index + 2]);
+                            }
+
+                            if (index + 4 >= length) {
+                                RETURN_ERROR("To short ':' command: missing third argument");
+                            }
+
+                            start_char = input + index + 4;
+
+                        } else {
+                            RETURN_ERROR("Unrecognized number command: u%s", (input + index + 1));
+                        }
+
+
+                        uint64_t* value = get_ulong(start_char);
+                        ASSERT_OR_ERROR(value != NULL, "Not an unsigned int: '%s'", start_char);
+
+                        if (*value > limit_max) {
+                            RETURN_ERROR("Maximum Limit reached for unsigned int: %lu > %lu", *value, limit_max);
+                        }
+
+                        if (type == 1) {
+                            field = oopetris_additional_information_create_u8(*value);
+                        } else if (type == 2) {
+                            field = oopetris_additional_information_create_u32(*value);
+                        } else if (type == 3) {
+                            field = oopetris_additional_information_create_u64(*value);
+                        } else {
+                            RETURN_ERROR("PROGRAMMING ERROR: UNREACHABLE");
+                        }
+
+                        free(value);
+                        goto return_field_value;
+                    }
+
+                    case 'i': {
+                        if (index + 3 >= length) {
+                            RETURN_ERROR("To short ':' command: missing third argument");
+                        }
+
+                        int64_t limit_min = 0;
+                        int64_t limit_max = 0;
+                        const char* start_char = input + index;
+                        uint8_t type = 0;
+
+                        if (input[index + 2] == ' ') {
+                            if (input[index + 1] == '8') {
+                                limit_min = SCHAR_MIN;
+                                limit_max = SCHAR_MAX;
+                                type = 1;
+                            } else {
+                                RETURN_ERROR("Unrecognized number command: i%c", input[index + 1]);
+                            }
+                            start_char = input + index + 3;
+                        } else if (input[index + 3] == ' ') {
+                            if (input[index + 1] == '3' && input[index + 2] == '2') {
+                                limit_min = INT_MIN;
+                                limit_max = INT_MAX;
+                                type = 2;
+                            } else if (input[index + 1] == '6' && input[index + 2] == '4') {
+                                limit_min = LLONG_MIN;
+                                limit_max = LLONG_MAX;
+                                type = 3;
+                            } else {
+                                RETURN_ERROR("Unrecognized number command: i%c%c", input[index + 1], input[index + 2]);
+                            }
+
+                            if (index + 4 >= length) {
+                                RETURN_ERROR("To short ':' command: missing third argument");
+                            }
+
+                            start_char = input + index + 4;
+
+                        } else {
+                            RETURN_ERROR("Unrecognized number command: i%s", (input + index + 1));
+                        }
+
+
+                        int64_t* value = get_long(start_char);
+                        ASSERT_OR_ERROR(value != NULL, "Not an int: '%s'", start_char);
+
+                        if (*value > limit_max) {
+                            RETURN_ERROR("Maximum Limit reached for int: %ld > %ld", *value, limit_max);
+                        }
+
+
+                        if (*value < limit_min) {
+                            RETURN_ERROR("Minimum Limit reached for int: %ld < %ld", *value, limit_min);
+                        }
+
+                        if (type == 1) {
+                            field = oopetris_additional_information_create_i8(*value);
+                        } else if (type == 2) {
+                            field = oopetris_additional_information_create_i32(*value);
+                        } else if (type == 3) {
+                            field = oopetris_additional_information_create_i64(*value);
+                        } else {
+                            RETURN_ERROR("PROGRAMMING ERROR: UNREACHABLE");
+                        }
+
                         free(value);
                         goto return_field_value;
                     }
