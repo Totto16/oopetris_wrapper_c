@@ -434,11 +434,10 @@ static double* get_double(const char* input) {
     return return_value;
 }
 
-static int64_t* get_long(const char* input) {
+static long long* get_long(const char* input) {
     char* end;
 
-    static_assert(sizeof(int64_t) == sizeof(long), "int64_t is an alias of long");
-    long res = strtol(input, &end, 0);
+    long long res = strtoll(input, &end, 0);
 
     if (end == input) {
         return NULL;
@@ -448,7 +447,7 @@ static int64_t* get_long(const char* input) {
         return NULL;
     }
 
-    long* return_value = malloc(sizeof(long));
+    long long* return_value = malloc(sizeof(long long));
 
     if (return_value == NULL) {
         return NULL;
@@ -459,13 +458,12 @@ static int64_t* get_long(const char* input) {
     return return_value;
 }
 
-static uint64_t* get_ulong(const char* input) {
+static unsigned long long* get_ulong(const char* input) {
 
 
     char* end;
 
-    static_assert(sizeof(uint64_t) == sizeof(unsigned long), "uint64_t is an alias of unsigned  long");
-    unsigned long res = strtoul(input, &end, 0);
+    unsigned long long res = strtoull(input, &end, 0);
 
     if (end == input) {
         return NULL;
@@ -475,7 +473,7 @@ static uint64_t* get_ulong(const char* input) {
         return NULL;
     }
 
-    unsigned long* return_value = malloc(sizeof(unsigned long));
+    unsigned long long* return_value = malloc(sizeof(unsigned long long));
 
     if (return_value == NULL) {
         return NULL;
@@ -735,7 +733,7 @@ Command parse_command(State* state, void** data, const char* input) {
                             RETURN_ERROR("To short ':' command: missing third argument");
                         }
 
-                        uint64_t limit_max = 0;
+                        unsigned long long limit_max = 0;
                         const char* start_char = input + index;
                         uint8_t type = 0;
 
@@ -769,11 +767,11 @@ Command parse_command(State* state, void** data, const char* input) {
                         }
 
 
-                        uint64_t* value = get_ulong(start_char);
+                        unsigned long long* value = get_ulong(start_char);
                         ASSERT_OR_ERROR(value != NULL, "Not an unsigned int: '%s'", start_char);
 
                         if (*value > limit_max) {
-                            RETURN_ERROR("Maximum Limit reached for unsigned int: %lu > %lu", *value, limit_max);
+                            RETURN_ERROR("Maximum Limit reached for unsigned int: %llu > %llu", *value, limit_max);
                         }
 
                         if (type == 1) {
@@ -796,8 +794,8 @@ Command parse_command(State* state, void** data, const char* input) {
                             RETURN_ERROR("To short ':' command: missing third argument");
                         }
 
-                        int64_t limit_min = 0;
-                        int64_t limit_max = 0;
+                        long long limit_min = 0;
+                        long long limit_max = 0;
                         const char* start_char = input + index;
                         uint8_t type = 0;
 
@@ -834,16 +832,16 @@ Command parse_command(State* state, void** data, const char* input) {
                         }
 
 
-                        int64_t* value = get_long(start_char);
+                        long long* value = get_long(start_char);
                         ASSERT_OR_ERROR(value != NULL, "Not an int: '%s'", start_char);
 
                         if (*value > limit_max) {
-                            RETURN_ERROR("Maximum Limit reached for int: %ld > %ld", *value, limit_max);
+                            RETURN_ERROR("Maximum Limit reached for int: %lld > %lld", *value, limit_max);
                         }
 
 
                         if (*value < limit_min) {
-                            RETURN_ERROR("Minimum Limit reached for int: %ld < %ld", *value, limit_min);
+                            RETURN_ERROR("Minimum Limit reached for int: %lld < %lld", *value, limit_min);
                         }
 
                         if (type == 1) {
@@ -1144,7 +1142,6 @@ int write_to_file(const char* file, bool failOnREPLError) {
     }
 
     oopetris_free_recording_information(information);
-
 
 
     return EXIT_SUCCESS;
