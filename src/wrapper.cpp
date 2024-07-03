@@ -9,6 +9,7 @@
 #include "recordings/utility/recording_writer.hpp"
 #include <filesystem>
 #include <memory>
+#include <utility>
 
 
 #if defined(__GNUC__)
@@ -884,6 +885,7 @@ static recorder::InformationValue additonal_information_field_to_cpp(const OOPet
 
         default:
             assert(false && "UNREACHABLE");
+            std::unreachable();
     };
 }
 
