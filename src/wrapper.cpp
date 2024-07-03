@@ -194,6 +194,7 @@ static void free_additional_value_field(OOPetrisAdditionalInformationField* fiel
     } else if (field->type == OOPetrisAdditionalInformationType_Vector) {
         auto* vector = field->value.vector;
         vector_of_value_free(vector, stbds_arrlenu(vector));
+        field->value.vector = NULL;
     }
 
 
@@ -209,8 +210,7 @@ static void vector_of_value_free(OOPetrisAdditionalInformationField** vector, si
     }
 
 
-    stbds_arrfree(*vector);
-    *vector = NULL;
+    stbds_arrfree(vector);
 }
 
 
