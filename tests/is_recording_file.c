@@ -4,7 +4,7 @@
 
 Test(IsRecordingFile, NullptrAsArgument) {
     bool is_recordings_file = oopetris_is_recording_file(NULL);
-    cr_assert(!is_recordings_file, "NULL is supported and doesn't crash");
+    cr_assert_not(is_recordings_file, "NULL is supported and doesn't crash");
 }
 
 

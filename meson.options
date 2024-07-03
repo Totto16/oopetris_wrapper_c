@@ -6,6 +6,13 @@ option(
 )
 
 option(
+    'tests_use_tap',
+    type: 'boolean',
+    value: true,
+    description: 'whether or not use tap to run the tests, it doesn\'t print the error message in case of an error, but otherwise it is better than the alternative',
+)
+
+option(
     'example',
     type: 'boolean',
     value: false,

@@ -13,6 +13,18 @@
 :k a number 2
 :i32 -121313
 
+:k a number 3
+:i8 -12
+
+:k a number 4
+:u32 2132
+
+:k a number 5
+:i64 -2132
+
+:k a big number
+:u64 0xFFFFFFFF
+
 :k a normal string with spaces
 :s this is the value
 
@@ -44,6 +56,10 @@
 :u64 0xFFFFFFFF
 
 :ve
+
+:i8 -1
+:u32 0xFFEE
+:i64 -121341242
 
 :ve
 

@@ -158,7 +158,7 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
                                     return return_value;
                                 },
                                 [return_value](const i64& value) -> OOPetrisAdditionalInformationField* {
-                                    return_value->type = OOPetrisAdditionalInformationType_Float;
+                                    return_value->type = OOPetrisAdditionalInformationType_I64;
                                     return_value->value.i64 = value;
                                     return return_value;
                                 },

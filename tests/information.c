@@ -19,10 +19,10 @@ Test(Information, LibVersion) {
 
 Test(Information, GridProperties) {
     OOPetrisGridProperties* properties = oopetris_get_grid_properties();
-    cr_assert(properties != NULL, "returned properties are non-NULL");
+    cr_assert_not_null(properties, "returned properties are non-NULL");
     cr_assert(eq(u32, properties->height, 20));
     cr_assert(eq(u32, properties->width, 10));
 
     FREE_AND_SET_NULL(oopetris_free_grid_properties, properties);
-    cr_assert(properties == NULL, "properties are freed correctly");
+    cr_assert_null(properties, "properties are freed correctly");
 }
