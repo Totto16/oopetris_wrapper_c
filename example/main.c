@@ -192,7 +192,7 @@ void print_mino_stack(const OOPetrisMino* const stack) {
 
     const size_t buffer_size = properties->height * properties->width;
 
-    char* buffer = malloc(buffer_size);
+    char* buffer = OOPETRIS_MALLOC(buffer_size);
 
     if (buffer == NULL) {
         return;
@@ -213,13 +213,13 @@ void print_mino_stack(const OOPetrisMino* const stack) {
         int result = write(STDOUT_FILENO, buffer + (y * properties->width), properties->width);
 #endif
         if (result < 0) {
-            free(buffer);
+            OOPETRIS_FREE(buffer);
             return;
         }
         printf("\n");
     }
 
-    free(buffer);
+    OOPETRIS_FREE(buffer);
     FREE_AND_SET_NULL(oopetris_free_grid_properties, properties);
 }
 
@@ -369,7 +369,7 @@ typedef struct {
 
 static char* copy_str(const char* input) {
     size_t size = strlen(input);
-    char* string = (char*) malloc(size + 1);
+    char* string = (char*) OOPETRIS_MALLOC(size + 1);
 
     if (string == NULL) {
         return NULL;
@@ -396,7 +396,7 @@ static float* get_float(const char* input) {
         return NULL;
     }
 
-    float* return_value = malloc(sizeof(float));
+    float* return_value = OOPETRIS_MALLOC(sizeof(float));
 
     if (return_value == NULL) {
         return NULL;
@@ -419,7 +419,7 @@ static double* get_double(const char* input) {
         return NULL;
     }
 
-    double* return_value = malloc(sizeof(double));
+    double* return_value = OOPETRIS_MALLOC(sizeof(double));
 
     if (return_value == NULL) {
         return NULL;
@@ -447,7 +447,7 @@ static long long* get_long(const char* input) {
         return NULL;
     }
 
-    long long* return_value = malloc(sizeof(long long));
+    long long* return_value = OOPETRIS_MALLOC(sizeof(long long));
 
     if (return_value == NULL) {
         return NULL;
@@ -473,7 +473,7 @@ static unsigned long long* get_ulong(const char* input) {
         return NULL;
     }
 
-    unsigned long long* return_value = malloc(sizeof(unsigned long long));
+    unsigned long long* return_value = OOPETRIS_MALLOC(sizeof(unsigned long long));
 
     if (return_value == NULL) {
         return NULL;
@@ -498,7 +498,7 @@ static bool* get_bool(const char* input) {
     }
 
 
-    bool* return_value = malloc(sizeof(bool));
+    bool* return_value = OOPETRIS_MALLOC(sizeof(bool));
 
     if (return_value == NULL) {
         return NULL;
@@ -515,9 +515,9 @@ Command parse_command(State* state, void** data, const char* input) {
 #define ERROR_BUF_SIZE 0x200
 #define RETURN_ERROR(...)                                       \
     do {                                                        \
-        *data = malloc(ERROR_BUF_SIZE);                         \
+        *data = OOPETRIS_MALLOC(ERROR_BUF_SIZE);                \
         if (snprintf(*data, ERROR_BUF_SIZE, __VA_ARGS__) < 0) { \
-            free(*data);                                        \
+            OOPETRIS_FREE(*data);                               \
             *data = NULL;                                       \
         }                                                       \
         return CommandError;                                    \
@@ -647,7 +647,7 @@ Command parse_command(State* state, void** data, const char* input) {
                         char* malloced_str = copy_str(key);
                         VERIFY_MALLOC(malloced_str);
 
-                        TempData* return_value = (TempData*) malloc(sizeof(TempData));
+                        TempData* return_value = (TempData*) OOPETRIS_MALLOC(sizeof(TempData));
                         VERIFY_MALLOC(return_value);
 
                         return_value->type = TempDataEnumAddInfoKey;
@@ -670,7 +670,7 @@ Command parse_command(State* state, void** data, const char* input) {
                         ASSERT_OR_ERROR(value != NULL, "Not a float: %s", float_v);
 
                         field = oopetris_additional_information_create_float(*value);
-                        free(value);
+                        OOPETRIS_FREE(value);
                         adding = "float";
                         goto return_field_value;
                     }
@@ -689,7 +689,7 @@ Command parse_command(State* state, void** data, const char* input) {
                         ASSERT_OR_ERROR(value != NULL, "Not a double: %s", double_v);
 
                         field = oopetris_additional_information_create_double(*value);
-                        free(value);
+                        OOPETRIS_FREE(value);
                         adding = "double";
                         goto return_field_value;
                     }
@@ -708,7 +708,7 @@ Command parse_command(State* state, void** data, const char* input) {
                         ASSERT_OR_ERROR(value != NULL, "Not a bool: %s", bool_v);
 
                         field = oopetris_additional_information_create_bool(*value);
-                        free(value);
+                        OOPETRIS_FREE(value);
                         adding = "bool";
                         goto return_field_value;
                     }
@@ -784,7 +784,7 @@ Command parse_command(State* state, void** data, const char* input) {
                             RETURN_ERROR("PROGRAMMING ERROR: UNREACHABLE");
                         }
 
-                        free(value);
+                        OOPETRIS_FREE(value);
                         adding = "unsigned int";
                         goto return_field_value;
                     }
@@ -854,7 +854,7 @@ Command parse_command(State* state, void** data, const char* input) {
                             RETURN_ERROR("PROGRAMMING ERROR: UNREACHABLE");
                         }
 
-                        free(value);
+                        OOPETRIS_FREE(value);
                         adding = "int";
                         goto return_field_value;
                     }
@@ -939,15 +939,15 @@ Command parse_command(State* state, void** data, const char* input) {
                                             oopetris_additional_information_create_vector(final_vec);
 
 
-                                    AdditionalInformationData* return_value =
-                                            (AdditionalInformationData*) malloc(sizeof(AdditionalInformationData));
+                                    AdditionalInformationData* return_value = (AdditionalInformationData*)
+                                            OOPETRIS_MALLOC(sizeof(AdditionalInformationData));
                                     VERIFY_MALLOC(return_value);
 
                                     return_value->key = temp->value.vector.key;
                                     return_value->value = field;
 
                                     stbds_arrfree(temp->value.vector.vectors);
-                                    free(temp);
+                                    OOPETRIS_FREE(temp);
 
                                     *data = return_value;
                                     return CommandInsertAddInfo;
@@ -988,12 +988,12 @@ Command parse_command(State* state, void** data, const char* input) {
                             // construct a normal CommandInsertAddInfo
 
                             AdditionalInformationData* return_value =
-                                    (AdditionalInformationData*) malloc(sizeof(AdditionalInformationData));
+                                    (AdditionalInformationData*) OOPETRIS_MALLOC(sizeof(AdditionalInformationData));
                             VERIFY_MALLOC(return_value);
 
                             return_value->key = temp->value.add_info_key.key;
                             return_value->value = field;
-                            free(temp);
+                            OOPETRIS_FREE(temp);
 
                             *data = return_value;
                             return CommandInsertAddInfo;
@@ -1111,7 +1111,7 @@ int write_to_file(const char* file, bool failOnREPLError) {
                 }
 
                 printf("Error: %s\n", (const char*) data);
-                free(data);
+                OOPETRIS_FREE(data);
                 data = NULL;
                 if (failOnREPLError) {
                     return EXIT_FAILURE;
@@ -1120,8 +1120,8 @@ int write_to_file(const char* file, bool failOnREPLError) {
             case CommandInsertAddInfo: {
                 AdditionalInformationData* ptr = (AdditionalInformationData*) data;
                 oopetris_add_information_field(information->information, ptr->key, ptr->value);
-                free(ptr->key);
-                free(ptr);
+                OOPETRIS_FREE(ptr->key);
+                OOPETRIS_FREE(ptr);
                 data = NULL;
                 break;
             }
@@ -1129,14 +1129,14 @@ int write_to_file(const char* file, bool failOnREPLError) {
                 break;
         }
 
-        free(input);
+        OOPETRIS_FREE(input);
     }
 
     char* write_error = oopetris_write_to_file(information, file, false);
 
     if (write_error != NULL) {
         fprintf(stderr, "An error occured, while trying to write information to file '%s': %s\n", file, write_error);
-        free(write_error);
+        OOPETRIS_FREE(write_error);
         oopetris_free_recording_information(information);
         return EXIT_FAILURE;
     }

@@ -2,13 +2,33 @@
 
 #pragma once
 
-// assure we only include the header and with correct defines
+// assure we only include the header with correct defines
 #ifndef STBDS_NO_SHORT_NAMES
 #define STBDS_NO_SHORT_NAMES
 #endif
 #ifdef STB_DS_IMPLEMENTATION
 #undef STB_DS_IMPLEMENTATION
 #endif
+
+
+#if defined(OOPETRIS_REALLOC) && !defined(OOPETRIS_FREE) || !defined(OOPETRIS_REALLOC) && defined(OOPETRIS_FREE)
+#error "You must define both OOPETRIS_REALLOC and OOPETRIS_FREE, or neither."
+#endif
+
+#if defined(OOPETRIS_REALLOC) && defined(OOPETRIS_FREE)
+#define STBDS_REALLOC(c, p, s) OOPETRIS_REALLOC(p, s)
+#define STBDS_FREE(c, p) OOPETRIS_FREE(p)
+#else
+
+#include <stdlib.h>
+
+#define OOPETRIS_REALLOC(p, s) realloc(p, s)
+#define OOPETRIS_FREE(p) free(p)
+#endif
+
+
+#define OOPETRIS_MALLOC(s) OOPETRIS_REALLOC(NULL, s)
+
 #include "./thirdparty/stb_ds.h"
 
 

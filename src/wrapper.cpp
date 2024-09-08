@@ -17,6 +17,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 
+
 #define STB_DS_IMPLEMENTATION
 #define STBDS_NO_SHORT_NAMES
 #define STBDS_SIPHASH_2_4
@@ -53,10 +54,10 @@ bool oopetris_is_recording_file(const char* file_path) {
 static OOPetrisRecordingReturnValue*
 construct_error_from_cstr_impl(OOPetrisRecordingReturnValue* return_value, const char* value, size_t length) {
 
-    auto* alloced_str = static_cast<char*>(malloc(length + 1));
+    auto* alloced_str = static_cast<char*>(OOPETRIS_MALLOC(length + 1));
 
     if (alloced_str == nullptr) {
-        free(return_value);
+        OOPETRIS_FREE(return_value);
         return nullptr;
     }
 
@@ -89,7 +90,8 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
 
 
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -98,10 +100,10 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
 
     return std::visit(
             helper::overloaded{ [return_value](const std::string& value) -> OOPetrisAdditionalInformationField* {
-                                   auto* string = static_cast<char*>(malloc(value.size() + 1));
+                                   auto* string = static_cast<char*>(OOPETRIS_MALLOC(value.size() + 1));
 
                                    if (string == nullptr) {
-                                       free(return_value);
+                                       OOPETRIS_FREE(return_value);
                                        return nullptr;
                                    }
 
@@ -173,7 +175,7 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
                                         auto* result = information_value_to_c(value.at(i));
                                         if (result == nullptr) {
                                             vector_of_value_free(fields, i);
-                                            free(return_value);
+                                            OOPETRIS_FREE(return_value);
                                             return nullptr;
                                         }
                                         fields[i] = result;
@@ -191,7 +193,7 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
 static void free_additional_value_field(OOPetrisAdditionalInformationField* field) {
 
     if (field->type == OOPetrisAdditionalInformationType_String) {
-        free(field->value.string);
+        OOPETRIS_FREE(field->value.string);
     } else if (field->type == OOPetrisAdditionalInformationType_Vector) {
         auto* vector = field->value.vector;
         vector_of_value_free(vector, stbds_arrlenu(vector));
@@ -199,7 +201,7 @@ static void free_additional_value_field(OOPetrisAdditionalInformationField* fiel
     }
 
 
-    free(field);
+    OOPETRIS_FREE(field);
 }
 
 
@@ -222,7 +224,7 @@ static OOPetrisAdditionalInformation* recording_reader_get_additional_informatio
     stbds_rand_seed(time(NULL));
 
     OOPetrisAdditionalInformation* result =
-            (OOPetrisAdditionalInformation*) malloc(sizeof(OOPetrisAdditionalInformation));
+            (OOPetrisAdditionalInformation*) OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformation));
 
     if (result == nullptr) {
         return nullptr;
@@ -359,7 +361,7 @@ static void oopetris_additional_information_free(OOPetrisAdditionalInformation* 
     }
 
     stbds_shfree(information->values);
-    free(information);
+    OOPETRIS_FREE(information);
 }
 
 static OOPetrisTetrionRecord record_to_c(const recorder::Record& record) {
@@ -408,7 +410,8 @@ static OOPetrisTetrionHeader tetrion_header_to_c(const recorder::TetrionHeader& 
 
 static OOPetrisRecordingInformation* recording_reader_to_c(const recorder::RecordingReader& value) {
 
-    auto* return_value = static_cast<OOPetrisRecordingInformation*>(malloc(sizeof(OOPetrisRecordingInformation)));
+    auto* return_value =
+            static_cast<OOPetrisRecordingInformation*>(OOPETRIS_MALLOC(sizeof(OOPetrisRecordingInformation)));
 
 
     if (return_value == nullptr) {
@@ -419,7 +422,7 @@ static OOPetrisRecordingInformation* recording_reader_to_c(const recorder::Recor
 
     return_value->information = recording_reader_get_additional_information(value.information());
     if (return_value->information == nullptr) {
-        free(return_value);
+        OOPETRIS_FREE(return_value);
         return nullptr;
     }
 
@@ -462,7 +465,8 @@ static OOPetrisRecordingInformation* recording_reader_to_c(const recorder::Recor
 
 OOPetrisRecordingReturnValue* oopetris_get_recording_information(const char* file_path) {
 
-    auto* return_value = static_cast<OOPetrisRecordingReturnValue*>(malloc(sizeof(OOPetrisRecordingReturnValue)));
+    auto* return_value =
+            static_cast<OOPetrisRecordingReturnValue*>(OOPETRIS_MALLOC(sizeof(OOPetrisRecordingReturnValue)));
 
     if (return_value == nullptr) {
         return nullptr;
@@ -533,16 +537,16 @@ void oopetris_free_recording_information(OOPetrisRecordingInformation* informati
 
     stbds_arrfree(information->tetrion_headers);
 
-    free(information);
+    OOPETRIS_FREE(information);
 }
 
 void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue* information) {
-    free(information);
+    OOPETRIS_FREE(information);
 }
 
 void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue* information) {
     if (oopetris_is_error(information)) {
-        free(information->value.error);
+        OOPETRIS_FREE(information->value.error);
     } else {
         oopetris_free_recording_information(information->value.information);
     }
@@ -555,7 +559,7 @@ const char* oopetris_get_lib_version(void) {
 }
 
 OOPetrisGridProperties* oopetris_get_grid_properties(void) {
-    auto* properties = static_cast<OOPetrisGridProperties*>(malloc(sizeof(OOPetrisGridProperties)));
+    auto* properties = static_cast<OOPetrisGridProperties*>(OOPETRIS_MALLOC(sizeof(OOPetrisGridProperties)));
     if (properties == nullptr) {
         return nullptr;
     }
@@ -568,7 +572,7 @@ OOPetrisGridProperties* oopetris_get_grid_properties(void) {
 
 
 void oopetris_free_grid_properties(OOPetrisGridProperties* properties) {
-    free(properties);
+    OOPETRIS_FREE(properties);
 }
 
 
@@ -580,7 +584,8 @@ size_t oopetris_array_len(void* const array) {
 
 OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
 
-    auto* return_value = static_cast<OOPetrisRecordingInformation*>(malloc(sizeof(OOPetrisRecordingInformation)));
+    auto* return_value =
+            static_cast<OOPetrisRecordingInformation*>(OOPETRIS_MALLOC(sizeof(OOPetrisRecordingInformation)));
 
 
     if (return_value == nullptr) {
@@ -593,7 +598,7 @@ OOPetrisRecordingInformation* oopetris_create_recording_information(void) {
     return_value->information = NULL;
 
 
-    return_value->information = (OOPetrisAdditionalInformation*) malloc(sizeof(OOPetrisAdditionalInformation));
+    return_value->information = (OOPetrisAdditionalInformation*) OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformation));
 
     if (return_value->information == nullptr) {
         return nullptr;
@@ -624,7 +629,8 @@ void oopetris_add_information_field(
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_string(const char* value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -634,10 +640,10 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_strin
 
     const size_t length = strlen(value);
 
-    auto* string = static_cast<char*>(malloc(length + 1));
+    auto* string = static_cast<char*>(OOPETRIS_MALLOC(length + 1));
 
     if (string == nullptr) {
-        free(return_value);
+        OOPETRIS_FREE(return_value);
         return nullptr;
     }
 
@@ -654,7 +660,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_strin
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_float(float value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -669,7 +676,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_float
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_double(double value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -684,7 +692,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_doubl
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(bool value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -699,7 +708,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(uint8_t value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -714,7 +724,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(ui
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(int8_t value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -729,7 +740,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(in
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(uint32_t value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -745,7 +757,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(u
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(int32_t value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -760,7 +773,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(i
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(uint64_t value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -775,7 +789,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(u
 
 OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(int64_t value) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -803,7 +818,8 @@ OOPetrisAdditionalInformationField* oopetris_additional_information_create_vecto
         OOPetrisAdditionalInformationField** value
 ) {
     auto* return_value =
-            static_cast<OOPetrisAdditionalInformationField*>(malloc(sizeof(OOPetrisAdditionalInformationField)));
+            static_cast<OOPetrisAdditionalInformationField*>(OOPETRIS_MALLOC(sizeof(OOPetrisAdditionalInformationField))
+            );
 
 
     if (return_value == nullptr) {
@@ -829,7 +845,7 @@ void oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetr
 }
 
 static char* str_to_error(const std::string& error) {
-    auto* alloced_str = static_cast<char*>(malloc(error.size() + 1));
+    auto* alloced_str = static_cast<char*>(OOPETRIS_MALLOC(error.size() + 1));
 
     if (alloced_str == nullptr) {
         return nullptr;
