@@ -28,10 +28,10 @@ jobs:
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh 18
-          sudo apt-get install libc++-18* libc++abi*18* llvm-18 -y --no-install-recommends
-          echo "CC=clang-18" >> "$GITHUB_ENV"
-          echo "CXX=clang++-18" >> "$GITHUB_ENV"
+          sudo ./llvm.sh 19
+          sudo apt-get install libc++-19* libc++abi*19* llvm-19 -y --no-install-recommends
+          echo "CC=clang-19" >> "$GITHUB_ENV"
+          echo "CXX=clang++-19" >> "$GITHUB_ENV"
 
         # NOTE: meson has no dependencies, so --break-system-packages doesn't really break anything!
       - name: Setup meson
@@ -43,7 +43,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build valgrind gcovr libcriterion-dev libreadline-dev -y --no-install-recommends
 
-      - name: Configure
+      - name: Configure OOPetris
         run: |
           cd oopetris
           meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Donly_build_libs=true -Dprefix=/usr
