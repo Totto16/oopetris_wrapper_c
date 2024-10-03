@@ -1,12 +1,15 @@
 
 
-#include "core/game/mino_stack.hpp"
-#include "core/game/tetromino_type.hpp"
-#include "core/helper/input_event.hpp"
-#include "oopetris_wrapper.h"
-#include "opaque_types.h"
-#include "recordings/utility/additional_information.hpp"
-#include "recordings/utility/recording_writer.hpp"
+#include <core/game/mino_stack.hpp>
+#include <core/game/tetromino_type.hpp>
+#include <core/helper/input_event.hpp>
+#include <recordings/recordings.hpp>
+#include <recordings/utility/additional_information.hpp>
+#include <recordings/utility/recording_writer.hpp>
+
+#include "./opaque_types.h"
+#include "./wrapper.h"
+
 #include <filesystem>
 #include <memory>
 #include <utility>
@@ -32,7 +35,6 @@
 #include <core/core.hpp>
 #include <cstring>
 #include <ctime>
-#include <recordings/recordings.hpp>
 
 
 bool oopetris_is_recording_file(const char* file_path) {

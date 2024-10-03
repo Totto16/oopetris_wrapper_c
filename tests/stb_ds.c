@@ -21,8 +21,7 @@ void assert_impl(bool x) {
 #define STBDS_ASSERT(x) assert_impl(x);
 
 
-#include "./thirdparty/stb_ds.h"
-
+#include <c_wrapper/thirdparty/stb_ds.h>
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop

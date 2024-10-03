@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 #include <criterion/new/assert.h>
 
-#include "oopetris_wrapper.h"
+#include <c_wrapper/wrapper.h>
 
 Test(GetRecordingInformation, NullptrAsArgument) {
     OOPetrisRecordingReturnValue* return_value = oopetris_get_recording_information(NULL);

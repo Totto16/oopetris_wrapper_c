@@ -1,5 +1,5 @@
 
-#include "oopetris_wrapper.h"
+#include <c_wrapper/wrapper.h>
 
 #include <assert.h>
 #include <inttypes.h>
