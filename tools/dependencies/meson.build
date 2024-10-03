@@ -2,7 +2,7 @@ oopetris_recordings_dep = dependency('oopetris-recordings')
 
 dep_compiler = oopetris_recordings_dep.get_variable(
     pkgconfig: 'compiler',
-    internal: '__NOT_DEFINED__',
+    internal: 'pkg_cpp_compiler',
     default_value: cpp.get_id(),
 )
 
