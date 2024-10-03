@@ -27,6 +27,7 @@ liboopetris_c_wrapper = library(
     'oopetris_c_wrapper',
     src_files,
     dependencies: deps,
+    cpp_shared_args: ['-DOOPETRIS_LIBRARY_C_WRAPPER_EXPORT'],
     override_options: {
         'warning_level': '3',
         'werror': true,
@@ -43,6 +44,14 @@ liboopetris_c_wrapper_dep = declare_dependency(
 )
 meson.override_dependency('liboopetris-c-wrapper', liboopetris_c_wrapper_dep)
 
+cpp = meson.get_compiler('cpp')
+
+pkg_cpp_compiler = cpp.get_id()
+pkg_cpp_stdlib = 'unknown'
+if cpp.get_id() == 'clang'
+    pkg_cpp_stdlib = build_with_libcpp ? 'libc++' : 'libstdc++'
+endif
+
 # generate pkgconfig files
 pkg = import('pkgconfig')
 pkg.generate(
@@ -51,6 +60,7 @@ pkg.generate(
     name: 'oopetris-c-wrapper',
     filebase: 'oopetris-c-wrapper',
     subdirs: 'oopetris',
+    variables: ['compiler=' + pkg_cpp_compiler, 'cpp_stdlib=' + pkg_cpp_stdlib],
 )
 
 if get_option('tests')

@@ -15,53 +15,53 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - name: Windows MSVC Release
+          - name: Windows MSVC
             os: windows
             os-version: 2022
             environment: msvc
             shell: pwsh
 
-          - name: Windows MingGW Release
+          - name: Windows MingGW
             os: windows
             os-version: 2022
             environment: mingw
             architecture: x86_64
             shell: 'msys2 {0}'
 
-          - name: Windows UCRT Release
+          - name: Windows UCRT
             os: windows
             os-version: 2022
             environment: ucrt
             architecture: ucrt-x86_64
             shell: 'msys2 {0}'
 
-          - name: Linux Release
+          - name: Linux 
             os: ubuntu
             os-version: 24.04
             use-clang: false
             shell: bash
 
-          - name: Linux Clang Release (libstdc++)
+          - name: Linux Clang (libstdc++)
             os: ubuntu
             os-version: 24.04
             use-clang: true
             use-clang_stdlib: false
             shell: bash
 
-          - name: Linux Clang Release (libc++)
+          - name: Linux Clang (libc++)
             os: ubuntu
             os-version: 24.04
             use-clang: true
             use-clang_stdlib: true
             shell: bash
 
-          - name: MacOS Release
+          - name: MacOS
             os: macos
             os-version: 13
             arm: false
             shell: bash
 
-          - name: MacOS Release (Arm64)
+          - name: MacOS (Arm64)
             os: macos
             os-version: 14
             arm: true
@@ -183,24 +183,13 @@ jobs:
           choco install pkgconfiglite
           echo "PKG_CONFIG_PATH=C:/lib/pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Configure OOPetris
+      - name: Build and Install OOPetris
         run: |
           cd oopetris
-          meson setup build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' ) && 'enabled' || 'disabled' }} -Donly_build_libs=true ${{ matrix.config.os == 'windows' && '-Db_vscrt=from_buildtype' || '' }} ${{ (matrix.config.os == 'windows' && ( matrix.config.environment == 'mingw' || matrix.config.environment == 'ucrt' )) && '-Dprefix=$RUNNER_TEMP/msys64${MINGW_PREFIX}/' || ''}}
-
-      - name: Build and install Libs
-        if: matrix.config.os != 'ubuntu'
-        run: |
-          cd oopetris
-          meson install -C build
-
-      - name: Build and install Libs (Linux)
-        if: matrix.config.os == 'ubuntu'
-        run: |
-          cd oopetris
-          sudo meson install -C build
+          meson setup build -Dbuildtype=release -Ddefault_library=shared -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' ) && 'enabled' || 'disabled' }} -Donly_build_libs=true ${{ matrix.config.os == 'windows' && '-Db_vscrt=from_buildtype' || '' }} ${{ (matrix.config.os == 'windows' && ( matrix.config.environment == 'mingw' || matrix.config.environment == 'ucrt' )) && '-Dprefix=$RUNNER_TEMP/msys64${MINGW_PREFIX}/' || ''}}
+          ${{ matrix.config.os == 'ubuntu' && 'sudo' || '' }} meson install -C build
 
       - name: Build Wrapper
         run: |
-          meson setup -Dtests=false -Dexample=true build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' ) && 'enabled' || 'disabled' }} ${{ matrix.config.os == 'windows' && '-Db_vscrt=from_buildtype' || '' }}
+          meson setup -Dtests=false -Dexample=true build -Dbuildtype=release -Ddefault_library=shared -Dclang_libcpp=${{ ( ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true && matrix.config.use-clang_stdlib ) || matrix.config.os == 'macos' ) && 'enabled' || 'disabled' }} ${{ matrix.config.os == 'windows' && '-Db_vscrt=from_buildtype' || '' }}
           meson compile -C build

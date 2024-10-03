@@ -43,20 +43,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build valgrind gcovr libcriterion-dev libreadline-dev -y --no-install-recommends
 
-      - name: Configure OOPetris
+      - name: Build and Install OOPetris
         run: |
           cd oopetris
-          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Donly_build_libs=true -Dprefix=/usr
-
-      - name: Build and install Libs
-        run: |
-          cd oopetris
+          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Donly_build_libs=true
           sudo meson install -C build
 
       - name: Build Wrapper
         run: |
-          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Dtests=true -Dexample=true -Dprefix=/usr
+          meson setup build -Db_coverage=true -Dbuildtype=debugoptimized -Ddefault_library=shared -Dclang_libcpp=enabled -Dtests=true -Dexample=true
           meson compile -C build
+          sudo ldconfig
 
       - name: Test Wrapper
         run: |
@@ -81,7 +78,7 @@ jobs:
             ./build/meson-logs/coverage.xml
             ./build/meson-logs/coveragereport/
 
-      - name: Test for leaks with valgrind (Linux)
+      - name: Test for leaks with valgrind
         run: |
           valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./build/example/example r ./tests/files/correct.rec
           valgrind --tool=memcheck --leak-check=full --error-exitcode=1 cat ./tests/files/example.rec_text | ./build/example/example w ./test.rec

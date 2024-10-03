@@ -7,7 +7,7 @@
 #define OOPETRIS_REALLOC(p, s) mock_realloc(p, s)
 #define OOPETRIS_FREE(p) mock_free(p)
 
-#include "oopetris_wrapper.h"
+#include <c_wrapper/wrapper.h>
 
 // this tests likely fail, if we update the lib, but this failure on version bump serves as remainder,to check, if other things need changing too, since wrapper may become outdated otherwise
 

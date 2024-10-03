@@ -30,6 +30,7 @@
 #define OOPETRIS_MALLOC(s) OOPETRIS_REALLOC(NULL, s)
 
 #include "./thirdparty/stb_ds.h"
+#include "./windows.h"
 
 
 #ifdef __cplusplus
@@ -44,7 +45,7 @@ extern "C" {
  * @param file_path The FilePath of the potential recording file
  * @return bool
  */
-bool oopetris_is_recording_file(const char* file_path);
+OOPETRIS_C_WRAPPER_EXPORTED bool oopetris_is_recording_file(const char* file_path);
 
 // opaque type
 typedef struct OOPetrisAdditionalInformationImpl OOPetrisAdditionalInformation;
@@ -52,12 +53,14 @@ typedef struct OOPetrisAdditionalInformationImpl OOPetrisAdditionalInformation;
 // opaque type
 typedef struct OOPetrisAdditionalInformationFieldImpl OOPetrisAdditionalInformationField;
 
-const char** oopetris_additional_information_get_keys(OOPetrisAdditionalInformation* information);
+OOPETRIS_C_WRAPPER_EXPORTED const char** oopetris_additional_information_get_keys(
+        OOPetrisAdditionalInformation* information
+);
 
 
-void oopetris_additional_information_keys_free(const char** keys);
+OOPETRIS_C_WRAPPER_EXPORTED void oopetris_additional_information_keys_free(const char** keys);
 
-const OOPetrisAdditionalInformationField*
+OOPETRIS_C_WRAPPER_EXPORTED const OOPetrisAdditionalInformationField*
 oopetris_additional_information_get_field(OOPetrisAdditionalInformation* information, const char* key);
 
 
@@ -77,34 +80,46 @@ typedef enum {
 } OOPetrisAdditionalInformationType;
 
 
-OOPetrisAdditionalInformationType oopetris_additional_information_field_get_type(
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationType
+oopetris_additional_information_field_get_type(const OOPetrisAdditionalInformationField* const field);
+
+OOPETRIS_C_WRAPPER_EXPORTED const char* oopetris_additional_information_field_get_string(
         const OOPetrisAdditionalInformationField* const field
 );
 
-const char* oopetris_additional_information_field_get_string(const OOPetrisAdditionalInformationField* const field);
-
-float oopetris_additional_information_field_get_float(const OOPetrisAdditionalInformationField* const field);
-
-double oopetris_additional_information_field_get_double(const OOPetrisAdditionalInformationField* const field);
-
-bool oopetris_additional_information_field_get_bool(const OOPetrisAdditionalInformationField* const field);
-
-uint8_t oopetris_additional_information_field_get_u8(const OOPetrisAdditionalInformationField* const field);
-
-int8_t oopetris_additional_information_field_get_i8(const OOPetrisAdditionalInformationField* const field);
-
-uint32_t oopetris_additional_information_field_get_u32(const OOPetrisAdditionalInformationField* const field);
-
-
-int32_t oopetris_additional_information_field_get_i32(const OOPetrisAdditionalInformationField* const field);
-
-uint64_t oopetris_additional_information_field_get_u64(const OOPetrisAdditionalInformationField* const field);
-
-int64_t oopetris_additional_information_field_get_i64(const OOPetrisAdditionalInformationField* const field);
-
-const OOPetrisAdditionalInformationField* const* oopetris_additional_information_field_get_vector(
+OOPETRIS_C_WRAPPER_EXPORTED float oopetris_additional_information_field_get_float(
         const OOPetrisAdditionalInformationField* const field
 );
+
+OOPETRIS_C_WRAPPER_EXPORTED double oopetris_additional_information_field_get_double(
+        const OOPetrisAdditionalInformationField* const field
+);
+
+OOPETRIS_C_WRAPPER_EXPORTED bool oopetris_additional_information_field_get_bool(
+        const OOPetrisAdditionalInformationField* const field
+);
+
+OOPETRIS_C_WRAPPER_EXPORTED uint8_t
+oopetris_additional_information_field_get_u8(const OOPetrisAdditionalInformationField* const field);
+
+OOPETRIS_C_WRAPPER_EXPORTED int8_t
+oopetris_additional_information_field_get_i8(const OOPetrisAdditionalInformationField* const field);
+
+OOPETRIS_C_WRAPPER_EXPORTED uint32_t
+oopetris_additional_information_field_get_u32(const OOPetrisAdditionalInformationField* const field);
+
+
+OOPETRIS_C_WRAPPER_EXPORTED int32_t
+oopetris_additional_information_field_get_i32(const OOPetrisAdditionalInformationField* const field);
+
+OOPETRIS_C_WRAPPER_EXPORTED uint64_t
+oopetris_additional_information_field_get_u64(const OOPetrisAdditionalInformationField* const field);
+
+OOPETRIS_C_WRAPPER_EXPORTED int64_t
+oopetris_additional_information_field_get_i64(const OOPetrisAdditionalInformationField* const field);
+
+OOPETRIS_C_WRAPPER_EXPORTED const OOPetrisAdditionalInformationField* const*
+oopetris_additional_information_field_get_vector(const OOPetrisAdditionalInformationField* const field);
 
 
 //TODO(): once we only support C23 (which also the compiled lib has to support ), add underlying enum type uint8_t
@@ -192,7 +207,7 @@ typedef struct OOPetrisRecordingReturnValueImpl OOPetrisRecordingReturnValue;
  * @param file_path The FilePath of the recording file
  * @return OOPetrisRecordingReturnValue* 
  */
-OOPetrisRecordingReturnValue* oopetris_get_recording_information(const char* file_path);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisRecordingReturnValue* oopetris_get_recording_information(const char* file_path);
 
 /**
  * @brief Determine if the given OOPetrisRecordingReturnValue* is an error or not, after calling this you can call either oopetris_get_error or oopetris_get_information. This has to be freed later, but pay attention, which free function you use, read more in the description of oopetris_free_recording_value
@@ -200,31 +215,31 @@ OOPetrisRecordingReturnValue* oopetris_get_recording_information(const char* fil
  * @param value The return value of oopetris_get_recording_information 
  * @return bool 
  */
-bool oopetris_is_error(OOPetrisRecordingReturnValue* value);
+OOPETRIS_C_WRAPPER_EXPORTED bool oopetris_is_error(OOPetrisRecordingReturnValue* value);
 
-const char* oopetris_get_error(OOPetrisRecordingReturnValue* value);
+OOPETRIS_C_WRAPPER_EXPORTED const char* oopetris_get_error(OOPetrisRecordingReturnValue* value);
 
-OOPetrisRecordingInformation* oopetris_get_information(OOPetrisRecordingReturnValue* value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisRecordingInformation* oopetris_get_information(OOPetrisRecordingReturnValue* value);
 
-void oopetris_free_recording_information(OOPetrisRecordingInformation* information);
+OOPETRIS_C_WRAPPER_EXPORTED void oopetris_free_recording_information(OOPetrisRecordingInformation* information);
 
-void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue* information);
+OOPETRIS_C_WRAPPER_EXPORTED void oopetris_free_recording_value_only(OOPetrisRecordingReturnValue* information);
 
-void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue* information);
+OOPETRIS_C_WRAPPER_EXPORTED void oopetris_free_recording_value_whole(OOPetrisRecordingReturnValue* information);
 
-const char* oopetris_get_lib_version(void);
+OOPETRIS_C_WRAPPER_EXPORTED const char* oopetris_get_lib_version(void);
 
 typedef struct {
     uint32_t height;
     uint32_t width;
 } OOPetrisGridProperties;
 
-OOPetrisGridProperties* oopetris_get_grid_properties(void);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisGridProperties* oopetris_get_grid_properties(void);
 
-void oopetris_free_grid_properties(OOPetrisGridProperties* properties);
+OOPETRIS_C_WRAPPER_EXPORTED void oopetris_free_grid_properties(OOPetrisGridProperties* properties);
 
 
-size_t oopetris_array_len(void* const array);
+OOPETRIS_C_WRAPPER_EXPORTED size_t oopetris_array_len(void* const array);
 
 #define FREE_AND_SET_NULL(fn, obj) \
     do {                           \
@@ -235,7 +250,7 @@ size_t oopetris_array_len(void* const array);
 
 // CREATION functions
 
-OOPetrisRecordingInformation* oopetris_create_recording_information(void);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisRecordingInformation* oopetris_create_recording_information(void);
 
 void oopetris_add_information_field(
         OOPetrisAdditionalInformation* additional_information,
@@ -244,42 +259,61 @@ void oopetris_add_information_field(
 );
 
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_string(const char* value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_string(
+        const char* value
+);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_float(float value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_float(float value
+);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_double(double value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_double(
+        double value
+);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(bool value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_bool(bool value);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(uint8_t value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_u8(uint8_t value
+);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(int8_t value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_i8(int8_t value);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(uint32_t value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_u32(
+        uint32_t value
+);
 
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(int32_t value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_i32(int32_t value
+);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(uint64_t value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_u64(
+        uint64_t value
+);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(int64_t value);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_i64(int64_t value
+);
 
-OOPetrisAdditionalInformationField** oopetris_additional_information_create_empty_vector(void);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField** oopetris_additional_information_create_empty_vector(
+        void
+);
 
-OOPetrisAdditionalInformationField** oopetris_additional_information_create_vector_with_size(size_t size);
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField**
+oopetris_additional_information_create_vector_with_size(size_t size);
 
-OOPetrisAdditionalInformationField* oopetris_additional_information_create_vector(
+OOPETRIS_C_WRAPPER_EXPORTED OOPetrisAdditionalInformationField* oopetris_additional_information_create_vector(
         OOPetrisAdditionalInformationField** value
 );
 
-void oopetris_add_record(OOPetrisRecordingInformation* information, OOPetrisTetrionRecord record);
+OOPETRIS_C_WRAPPER_EXPORTED void
+oopetris_add_record(OOPetrisRecordingInformation* information, OOPetrisTetrionRecord record);
 
-void oopetris_add_snapshot(OOPetrisRecordingInformation* information, OOPetrisTetrionSnapshot snapshot);
+OOPETRIS_C_WRAPPER_EXPORTED void
+oopetris_add_snapshot(OOPetrisRecordingInformation* information, OOPetrisTetrionSnapshot snapshot);
 
-void oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetrionHeader tetrion_header);
+OOPETRIS_C_WRAPPER_EXPORTED void
+oopetris_add_header(OOPetrisRecordingInformation* information, OOPetrisTetrionHeader tetrion_header);
 
-char* oopetris_write_to_file(OOPetrisRecordingInformation* information, const char* file_path, bool overwrite);
+OOPETRIS_C_WRAPPER_EXPORTED char*
+oopetris_write_to_file(OOPetrisRecordingInformation* information, const char* file_path, bool overwrite);
 
 
 #ifdef __cplusplus
