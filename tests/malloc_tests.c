@@ -4,10 +4,13 @@
 
 #include "mocks/malloc_mock.h"
 
+
 #define OOPETRIS_REALLOC(p, s) mock_realloc(p, s)
 #define OOPETRIS_FREE(p) mock_free(p)
 
 #include <c_wrapper/wrapper.h>
+
+#include <stdio.h>
 
 // this tests likely fail, if we update the lib, but this failure on version bump serves as remainder,to check, if other things need changing too, since wrapper may become outdated otherwise
 
@@ -27,13 +30,20 @@ Test(MallocTests, LibVersionNoMallocIsUsed) {
     mock_malloc_free_stats(stats);
 }
 
-/* 
-Test(Information, GridProperties) {
-    OOPetrisGridProperties* properties = oopetris_get_grid_properties();
-    cr_assert_not_null(properties, "returned properties are non-NULL");
-    cr_assert(eq(u32, properties->height, 20));
-    cr_assert(eq(u32, properties->width, 10));
 
-    FREE_AND_SET_NULL(oopetris_free_grid_properties, properties);
-    cr_assert_null(properties, "properties are freed correctly");
-} */
+Test(MallocTests, MallocFailWithGridProperties) {
+    MockMallocStats* stats = mock_malloc_create_stats();
+    mock_hook_into_glibc_realloc(stats);
+    // see https://github.com/lonnywong/glibcmock/blob/master/got_hook.cc
+    mock_fail_next_realloc_call();
+    fprintf(stderr, "test here %lu\n", mock_next_realloc_fail_count());
+    OOPetrisGridProperties* properties = oopetris_get_grid_properties();
+    fprintf(stderr, "test here %p\n", (void*) properties);
+    fprintf(stderr, "test here %lu\n", mock_next_realloc_fail_count());
+    cr_assert_null(properties, "returned properties are NULL");
+
+    cr_assert(eq(u32, mock_next_realloc_fail_count(), 0));
+
+    mock_free_glibc_hook_realloc(stats);
+    mock_malloc_free_stats(stats);
+}

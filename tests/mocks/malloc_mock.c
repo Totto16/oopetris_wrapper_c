@@ -62,6 +62,8 @@ void mock_free(void* ptr) {
 void* mock_realloc(void* ptr, size_t new_size) {
     assert(global_stats);
 
+    fprintf(stderr, "TEST here %lu\n", global_stats->realloc_fail_count);
+    exit(4);
     if (global_stats->realloc_fail_count > 0) {
         global_stats->realloc_fail_count--;
         return NULL;
@@ -97,6 +99,8 @@ MockMallocStats* mock_malloc_create_stats(void) {
     global_stats->free_calls = malloc(sizeof(DynArrayF));
     global_stats->free_calls->size = 0;
     global_stats->free_calls->nodes = NULL;
+
+    global_stats->realloc_fail_count = 0;
 
     return global_stats;
 }
