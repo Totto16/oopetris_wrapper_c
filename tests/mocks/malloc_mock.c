@@ -32,8 +32,11 @@ typedef struct {
 
 
 struct MockMallocStatsImpl {
+    // call history
     DynArrayR* realloced_calls;
     DynArrayF* free_calls;
+    // free fail history
+    size_t realloc_fail_count;
 };
 
 
@@ -58,6 +61,11 @@ void mock_free(void* ptr) {
 
 void* mock_realloc(void* ptr, size_t new_size) {
     assert(global_stats);
+
+    if (global_stats->realloc_fail_count > 0) {
+        global_stats->realloc_fail_count--;
+        return NULL;
+    }
 
     size_t previous_size = global_stats->realloced_calls->size;
 
@@ -126,4 +134,19 @@ uint64_t mock_malloc_count_realloc(MockMallocStats* stats) {
 uint64_t mock_malloc_count_free(MockMallocStats* stats) {
     assert(global_stats);
     return stats->free_calls->size;
+}
+
+void mock_fail_next_realloc_call(void) {
+    mock_fail_next_realloc_calls(1);
+}
+
+
+void mock_fail_next_realloc_calls(size_t size) {
+    assert(global_stats);
+
+    global_stats->realloc_fail_count += size;
+}
+
+size_t mock_next_realloc_fail_count(void) {
+    return global_stats->realloc_fail_count;
 }
