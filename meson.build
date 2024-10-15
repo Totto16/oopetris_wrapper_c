@@ -23,10 +23,16 @@ subdir('src')
 
 subdir('tools')
 
+c_args = [
+    '-DOOPETRIS_LIBRARY_C_WRAPPER_TYPE='
+    + (get_option('default_library') == 'static' ? '1' : '0'),
+]
+
 liboopetris_c_wrapper = library(
     'oopetris_c_wrapper',
     src_files,
     dependencies: deps,
+    cpp_args: c_args,
     cpp_shared_args: ['-DOOPETRIS_LIBRARY_C_WRAPPER_EXPORT'],
     override_options: {
         'warning_level': '3',
@@ -40,6 +46,7 @@ liboopetris_c_wrapper_dep = declare_dependency(
     link_with: liboopetris_c_wrapper,
     dependencies: deps,
     version: meson.project_version(),
+    compile_args: c_args,
     include_directories: include_directories('src'),
 )
 meson.override_dependency('liboopetris-c-wrapper', liboopetris_c_wrapper_dep)
@@ -60,6 +67,7 @@ pkg.generate(
     name: 'oopetris-c-wrapper',
     filebase: 'oopetris-c-wrapper',
     subdirs: 'oopetris',
+    extra_cflags: c_args,
     variables: ['compiler=' + pkg_cpp_compiler, 'cpp_stdlib=' + pkg_cpp_stdlib],
 )
 
