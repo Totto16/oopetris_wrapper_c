@@ -101,7 +101,7 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
     }
 
     return std::visit(
-            helper::overloaded{ [return_value](const std::string& value) -> OOPetrisAdditionalInformationField* {
+            helper::Overloaded{ [return_value](const std::string& value) -> OOPetrisAdditionalInformationField* {
                                    auto* string = static_cast<char*>(OOPETRIS_MALLOC(value.size() + 1));
 
                                    if (string == nullptr) {
