@@ -147,8 +147,8 @@ typedef struct {
 } OOPetrisTetrionRecord;
 
 typedef struct {
-    int8_t x;
-    int8_t y;
+    uint8_t x;
+    uint8_t y;
 } OOPetrisMinoPosition;
 
 
