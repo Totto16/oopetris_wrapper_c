@@ -101,7 +101,7 @@ static OOPetrisAdditionalInformationField* information_value_to_c(const recorder
     }
 
     return std::visit(
-            helper::overloaded{ [return_value](const std::string& value) -> OOPetrisAdditionalInformationField* {
+            helper::Overloaded{ [return_value](const std::string& value) -> OOPetrisAdditionalInformationField* {
                                    auto* string = static_cast<char*>(OOPETRIS_MALLOC(value.size() + 1));
 
                                    if (string == nullptr) {
@@ -373,7 +373,7 @@ static OOPetrisTetrionRecord record_to_c(const recorder::Record& record) {
 }
 
 static OOPetrisMino mino_to_c(const Mino& mino) {
-    auto orig_pos = mino.position();
+    auto orig_pos = mino.position().cast<uint8_t>();
 
     auto position = OOPetrisMinoPosition{ .x = orig_pos.x, .y = orig_pos.y };
 
@@ -963,7 +963,8 @@ char* oopetris_write_to_file(OOPetrisRecordingInformation* information, const ch
 
         for (std::size_t j = 0; j < stbds_arrlenu(snapshot.mino_stack); ++j) {
             const auto mino = snapshot.mino_stack[j];
-            mino_stack.set({ mino.position.x, mino.position.y }, static_cast<helper::TetrominoType>(mino.type));
+            const auto min_pos = shapes::AbstractPoint<u8>{ mino.position.x, mino.position.y };
+            mino_stack.set(min_pos.cast<i8>(), static_cast<helper::TetrominoType>(mino.type));
         }
 
         auto core_information = std::make_unique<TetrionCoreInformation>(
