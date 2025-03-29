@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  oopetris_main_repo_ref: 01236ab59b27e7a8889e48c73ec0361cf2206805
+
 jobs:
   build:
     name: ${{ matrix.config.name }}
@@ -89,7 +92,7 @@ jobs:
         with:
           fetch-depth: '0'
           repository: OpenBrickProtocolFoundation/oopetris
-          ref: main
+          ref: ${{ env.oopetris_main_repo_ref }}
           path: ./oopetris
           submodules: false
 
@@ -98,7 +101,7 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
-          toolset: 14.41
+          toolset: 14.43
 
       - name: Setup MYSYS2 (Windows)
         if: matrix.config.os == 'windows' && ( matrix.config.environment == 'mingw' || matrix.config.environment == 'ucrt' )
